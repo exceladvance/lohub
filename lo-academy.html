@@ -1,0 +1,636 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>LO Academy | Mortgage Loan Officer Training</title>
+<meta name="description" content="LO Academy is a front-end demo learning and professional-development platform for mortgage loan officers. All data is sample data stored only in your browser.">
+<style>
+:root{
+  --navy:#0f172a;--navy-2:#0b1222;--navy-3:#1e293b;--gold:#d9a51f;--gold-d:#b8880f;
+  --bg:#f8fafc;--card:#ffffff;--fg:#0f172a;--muted:#64748b;--border:#e2e8f0;--soft:#f1f5f9;
+  --chart1:#0f172a;--chart2:#d9a51f;--ok:#15803d;--okbg:#dcfce7;--warn:#a16207;--warnbg:#fef3c7;--bad:#b91c1c;--badbg:#fee2e2;
+  --shadow:0 1px 2px rgba(15,23,42,.06),0 1px 3px rgba(15,23,42,.05);--ring:#d9a51f;
+}
+:root[data-theme=dark]{
+  --bg:#0a1020;--card:#111a2e;--fg:#e8edf6;--muted:#94a3b8;--border:#223049;--soft:#17223a;
+  --chart1:#94a3b8;--ok:#4ade80;--okbg:#10301d;--warn:#facc15;--warnbg:#3a2f0a;--bad:#f87171;--badbg:#3b1414;
+  --shadow:0 1px 2px rgba(0,0,0,.4);
+}
+*{box-sizing:border-box}
+html{scroll-behavior:smooth}
+body{margin:0;background:var(--bg);color:var(--fg);font-family:Inter,ui-sans-serif,system-ui,-apple-system,"Segoe UI",Roboto,Helvetica,Arial,sans-serif;font-size:14.5px;line-height:1.5;-webkit-font-smoothing:antialiased}
+h1,h2,h3,h4,p{margin:0}
+a{color:inherit;text-decoration:none}
+button,input,select,textarea{font:inherit;color:inherit}
+button{cursor:pointer}
+:focus-visible{outline:2px solid var(--ring);outline-offset:2px;border-radius:6px}
+.ic{width:18px;height:18px;flex:none}
+.sr{position:absolute;width:1px;height:1px;overflow:hidden;clip:rect(0 0 0 0);white-space:nowrap}
+
+/* shell */
+.sidebar{position:fixed;inset:0 auto 0 0;width:256px;background:var(--navy);color:#cbd5e1;display:flex;flex-direction:column;z-index:40;transition:transform .2s}
+.brand{display:flex;align-items:center;gap:10px;padding:20px 18px}
+.logo{width:36px;height:36px;border-radius:9px;background:var(--gold);color:var(--navy);font-weight:800;display:grid;place-items:center}
+.brand b{font-size:19px;color:#fff;letter-spacing:.2px;flex:1}
+.icon-btn{background:transparent;border:0;color:#cbd5e1;width:34px;height:34px;border-radius:8px;display:grid;place-items:center;position:relative}
+.icon-btn:hover{background:var(--navy-3);color:#fff}
+nav.main{padding:6px 12px;display:flex;flex-direction:column;gap:3px;flex:1;overflow:auto}
+nav.main a{display:flex;align-items:center;gap:12px;padding:10px 12px;border-radius:9px;color:#aab6c8;font-weight:500}
+nav.main a:hover{background:var(--navy-3);color:#fff}
+nav.main a[aria-current=page]{background:var(--gold);color:var(--navy);font-weight:600}
+.profile{border-top:1px solid #1e293b;padding:16px 18px;display:flex;align-items:center;gap:11px}
+.avatar{width:38px;height:38px;border-radius:50%;background:var(--gold);color:var(--navy);display:grid;place-items:center;font-weight:700;font-size:13px;flex:none}
+.avatar.sm{width:30px;height:30px;font-size:11px;background:var(--soft);color:var(--fg);border:1px solid var(--border)}
+.avatar.md{width:40px;height:40px;font-size:13px;background:var(--navy);color:var(--gold)}
+.profile .who{flex:1;min-width:0}.profile .who b{color:#fff;display:block;font-size:14px}.profile .who span{font-size:12px;color:#94a3b8}
+.dot{position:absolute;top:6px;right:7px;width:8px;height:8px;background:#ef4444;border-radius:50%}
+.topbar{display:none;position:sticky;top:0;z-index:30;background:var(--navy);color:#fff;padding:10px 14px;align-items:center;gap:10px}
+.scrim{display:none;position:fixed;inset:0;background:rgba(2,6,23,.55);z-index:35}
+main{margin-left:256px;padding:32px;min-height:100vh}
+.page{max-width:1180px;margin:0 auto;animation:pin .2s ease-out}
+@keyframes pin{from{opacity:0;transform:translateY(8px)}to{opacity:1;transform:none}}
+@media (prefers-reduced-motion:reduce){*{animation:none!important;transition:none!important;scroll-behavior:auto!important}}
+@media (max-width:1023px){
+  .sidebar{transform:translateX(-100%)}
+  body.menu-open .sidebar{transform:none}
+  body.menu-open .scrim{display:block}
+  .topbar{display:flex}
+  main{margin-left:0;padding:20px 16px}
+}
+
+/* type + cards */
+.ph{margin-bottom:24px}
+.ph h1{font-size:34px;line-height:1.15;font-weight:800;letter-spacing:-.5px}
+.ph p{color:var(--muted);margin-top:6px;max-width:760px}
+@media(max-width:600px){.ph h1{font-size:28px}}
+.card{background:var(--card);border:1px solid var(--border);border-radius:12px;box-shadow:var(--shadow);padding:20px}
+.card.hover{transition:transform .15s,box-shadow .15s}
+.card.hover:hover{transform:translateY(-2px);box-shadow:0 6px 18px rgba(15,23,42,.1)}
+.card h2{font-size:18px;font-weight:700;margin-bottom:14px}
+.card h3{font-size:15.5px;font-weight:650}
+.muted{color:var(--muted)}.small{font-size:12.5px}
+.grid{display:grid;gap:18px}
+.g4{grid-template-columns:repeat(4,1fr)}.g3{grid-template-columns:repeat(3,1fr)}.g2{grid-template-columns:repeat(2,1fr)}.g21{grid-template-columns:2fr 1fr}.g12{grid-template-columns:1fr 2fr}
+@media(max-width:1100px){.g4{grid-template-columns:repeat(2,1fr)}.g3{grid-template-columns:repeat(2,1fr)}}
+@media(max-width:760px){.g4,.g3,.g2,.g21,.g12{grid-template-columns:1fr}}
+.stack{display:flex;flex-direction:column;gap:18px}
+.row{display:flex;align-items:center;gap:10px}.wrap{flex-wrap:wrap}.between{justify-content:space-between}.grow{flex:1;min-width:0}
+.stat{display:flex;justify-content:space-between;align-items:flex-start}
+.stat .lbl{font-size:13px;color:var(--muted);font-weight:500}.stat .val{font-size:30px;font-weight:800;margin-top:4px;letter-spacing:-.5px}
+.stat .ico{width:38px;height:38px;border-radius:10px;background:var(--soft);display:grid;place-items:center;color:var(--navy-3)}
+.stat .ico.gold{background:#fbf1d3;color:var(--gold-d)}
+:root[data-theme=dark] .stat .ico{color:var(--fg)}
+:root[data-theme=dark] .stat .ico.gold{background:#3a2f0a;color:var(--gold)}
+.badge{display:inline-flex;align-items:center;gap:4px;font-size:11.5px;font-weight:600;padding:2px 9px;border-radius:999px;background:var(--soft);color:var(--fg);border:1px solid var(--border)}
+.badge.gold{background:#fbf1d3;color:#7a5a05;border-color:#f0d68a}
+.badge.ok{background:var(--okbg);color:var(--ok);border-color:transparent}
+.badge.warn{background:var(--warnbg);color:var(--warn);border-color:transparent}
+.badge.draft{background:var(--soft);color:var(--muted)}
+:root[data-theme=dark] .badge.gold{background:#3a2f0a;color:var(--gold);border-color:#5a4710}
+.btn{display:inline-flex;align-items:center;justify-content:center;gap:7px;border-radius:9px;padding:9px 15px;font-weight:600;border:1px solid var(--border);background:var(--card);color:var(--fg);transition:background .15s}
+.btn:hover{background:var(--soft)}
+.btn.primary{background:var(--navy);border-color:var(--navy);color:#fff}
+.btn.primary:hover{background:var(--navy-3)}
+:root[data-theme=dark] .btn.primary{background:var(--gold);border-color:var(--gold);color:var(--navy)}
+.btn.gold{background:var(--gold);border-color:var(--gold);color:var(--navy)}.btn.gold:hover{background:var(--gold-d)}
+.btn.sm{padding:6px 11px;font-size:13px}
+.btn[disabled]{opacity:.5;cursor:not-allowed}
+.btn.saved{background:var(--okbg);color:var(--ok);border-color:transparent}
+.field{display:flex;flex-direction:column;gap:6px;margin-bottom:14px}
+.field label{font-weight:600;font-size:13px}
+input[type=text],input[type=number],input[type=search],select,textarea{width:100%;background:var(--card);border:1px solid var(--border);border-radius:9px;padding:9px 12px}
+textarea{min-height:90px;resize:vertical}
+.err{color:var(--bad);font-size:12.5px;min-height:1em}
+.note{background:var(--soft);border:1px solid var(--border);border-radius:9px;padding:10px 12px;font-size:12.5px;color:var(--muted);display:flex;gap:8px;align-items:flex-start}
+.note .ic{width:15px;height:15px;margin-top:2px}
+.bar{height:8px;background:var(--soft);border-radius:999px;overflow:hidden;border:1px solid var(--border)}
+.bar>i{display:block;height:100%;background:var(--gold);border-radius:999px}
+.bar.navy>i{background:var(--chart1)}
+.tabs{display:flex;gap:6px;overflow-x:auto;padding-bottom:4px;margin-bottom:18px;scrollbar-width:thin}
+.tab{border:1px solid var(--border);background:var(--card);padding:7px 14px;border-radius:999px;font-weight:600;font-size:13px;white-space:nowrap;color:var(--muted)}
+.tab:hover{background:var(--soft)}
+.tab[aria-selected=true]{background:var(--navy);color:#fff;border-color:var(--navy)}
+:root[data-theme=dark] .tab[aria-selected=true]{background:var(--gold);color:var(--navy);border-color:var(--gold)}
+.tbl-wrap{overflow-x:auto}
+table{width:100%;border-collapse:collapse;min-width:560px}
+th{text-align:left;font-size:12px;text-transform:uppercase;letter-spacing:.5px;color:var(--muted);padding:10px 12px;border-bottom:1px solid var(--border)}
+td{padding:11px 12px;border-bottom:1px solid var(--border)}
+tr.me td{background:#fbf1d3;color:#3b2d02}
+:root[data-theme=dark] tr.me td{background:#2e260a;color:#f6e7b3}
+tr.me td:first-child{box-shadow:inset 3px 0 0 var(--gold)}
+.num{text-align:right}
+.rk{width:30px;height:30px;border-radius:50%;display:inline-grid;place-items:center;font-weight:700;font-size:13px;background:var(--soft)}
+.rk.r1{background:#f6d365;color:#4a3500}.rk.r2{background:#d7dde5;color:#334155}.rk.r3{background:#e0a878;color:#4a2a0a}
+details.acc{border:1px solid var(--border);border-radius:10px;background:var(--card);margin-bottom:10px}
+details.acc summary{padding:14px 16px;font-weight:650;cursor:pointer;list-style:none;display:flex;justify-content:space-between;align-items:center}
+details.acc summary::-webkit-details-marker{display:none}
+details.acc summary::after{content:"+";font-size:20px;color:var(--muted)}
+details.acc[open] summary::after{content:"\2212"}
+details.acc .body{padding:0 16px 16px}
+.script{white-space:pre-wrap;background:var(--soft);border-radius:9px;padding:14px;border-left:3px solid var(--gold);margin-bottom:12px}
+
+/* thumbnails and covers */
+.thumb{position:relative;aspect-ratio:16/9;border-radius:10px;overflow:hidden;display:flex;align-items:flex-end;padding:12px;color:#fff;background:linear-gradient(135deg,#0f172a,#1e3a5f)}
+.thumb .pl{position:absolute;inset:0;display:grid;place-items:center}
+.thumb .pl span{width:46px;height:46px;border-radius:50%;background:rgba(255,255,255,.18);backdrop-filter:blur(2px);display:grid;place-items:center;border:1px solid rgba(255,255,255,.35)}
+.thumb .dur{position:absolute;right:10px;bottom:10px;background:rgba(2,6,23,.75);padding:1px 7px;border-radius:5px;font-size:12px;font-weight:600}
+.thumb .pg{position:absolute;left:0;right:0;bottom:0;height:4px;background:rgba(255,255,255,.2)}.thumb .pg i{display:block;height:100%;background:var(--gold)}
+.t-Prospecting{background:linear-gradient(135deg,#0f172a,#1d4e89)}.t-Underwriting{background:linear-gradient(135deg,#1f2937,#4b5563)}
+.t-Rate{background:linear-gradient(135deg,#0f172a,#0f766e)}.t-Agent{background:linear-gradient(135deg,#1e1b4b,#6d28d9)}
+.t-Closing{background:linear-gradient(135deg,#3b2a05,#b8880f)}.t-Compliance{background:linear-gradient(135deg,#0f172a,#7f1d1d)}
+.cover{width:150px;aspect-ratio:2/3;border-radius:6px 12px 12px 6px;background:linear-gradient(160deg,#0f172a,#1e293b);color:var(--gold);padding:14px 12px;display:flex;flex-direction:column;justify-content:space-between;box-shadow:6px 8px 18px rgba(15,23,42,.3);border-left:6px solid var(--gold);flex:none}
+.cover b{font-size:16px;line-height:1.15;letter-spacing:.3px;text-transform:uppercase}.cover span{font-size:11px;color:#cbd5e1;letter-spacing:1px;text-transform:uppercase}
+.cover.c2{background:linear-gradient(160deg,#3b2a05,#7a5a05)}.cover.c3{background:linear-gradient(160deg,#102a43,#1d4e89)}.cover.c4{background:linear-gradient(160deg,#1e1b4b,#4c1d95)}
+.cover.sm{width:100%;max-width:110px}.cover.sm b{font-size:12px}
+
+/* misc blocks */
+.post{display:flex;gap:14px}
+.votes{display:flex;flex-direction:column;align-items:center;gap:2px;min-width:38px}
+.votes button{border:0;background:transparent;color:var(--muted);width:30px;height:28px;border-radius:7px;display:grid;place-items:center}
+.votes button:hover{background:var(--soft)}
+.votes button[aria-pressed=true]{color:var(--gold-d);background:#fbf1d3}
+:root[data-theme=dark] .votes button[aria-pressed=true]{background:#3a2f0a;color:var(--gold)}
+.votes b{font-size:14px}
+.reply{display:flex;gap:10px;padding:10px 0;border-top:1px solid var(--border)}
+.check{display:flex;gap:10px;align-items:center;padding:9px 0;border-bottom:1px solid var(--border)}
+.check input{width:18px;height:18px;accent-color:#b8880f}
+.check input:checked+span{text-decoration:line-through;color:var(--muted)}
+.badge-tile{text-align:center;padding:16px 10px}
+.badge-tile .bi{width:54px;height:54px;border-radius:50%;margin:0 auto 8px;display:grid;place-items:center;background:#fbf1d3;color:var(--gold-d);border:2px solid var(--gold)}
+.badge-tile .bi .ic{width:24px;height:24px}
+.badge-tile.locked{opacity:.65}.badge-tile.locked .bi{background:var(--soft);color:var(--muted);border:2px dashed var(--border)}
+:root[data-theme=dark] .badge-tile .bi{background:#3a2f0a;color:var(--gold)}
+.ratestrip{background:var(--navy);color:#cbd5e1;border-radius:12px;padding:18px 22px;display:flex;flex-wrap:wrap;gap:22px;align-items:center;margin-bottom:22px}
+.ratestrip .r b{display:block;font-size:26px;color:var(--gold);letter-spacing:-.5px}
+.ratestrip .r span{font-size:12.5px}
+.ratestrip .tag{margin-left:auto;font-size:12px;border:1px solid #334155;padding:4px 10px;border-radius:999px;color:#e2e8f0}
+.hero{background:linear-gradient(135deg,var(--navy),#16233f);color:#fff;border-radius:14px;padding:26px;display:flex;gap:20px;align-items:center;flex-wrap:wrap}
+.hero .avatar{width:84px;height:84px;font-size:28px}
+.hero h2{color:#fff;margin:0 0 4px;font-size:26px}
+.hero .badge{background:#1e293b;color:#e2e8f0;border-color:#334155}
+.cal{display:grid;grid-template-columns:repeat(7,1fr);gap:4px;text-align:center}
+.cal .dh{font-size:11.5px;color:var(--muted);font-weight:600;padding:4px 0}
+.cal button{aspect-ratio:1;border:1px solid transparent;border-radius:9px;background:transparent;font-weight:500;min-height:36px}
+.cal button.av{background:var(--soft);border-color:var(--border);font-weight:700}
+.cal button.av:hover{border-color:var(--gold)}
+.cal button.sel{background:var(--gold);color:var(--navy);border-color:var(--gold)}
+.cal button[disabled]{color:var(--muted);opacity:.4;cursor:default}
+.slots{display:grid;grid-template-columns:repeat(auto-fill,minmax(110px,1fr));gap:8px}
+.slot{border:1px solid var(--border);background:var(--card);border-radius:9px;padding:9px;font-weight:600}
+.slot:hover{border-color:var(--gold);background:#fbf1d3;color:#3b2d02}
+.res{display:flex;gap:14px}
+.res .ri{width:42px;height:42px;border-radius:10px;background:var(--soft);display:grid;place-items:center;flex:none;color:var(--gold-d)}
+
+/* dialog */
+dialog{border:1px solid var(--border);border-radius:14px;padding:0;background:var(--card);color:var(--fg);width:min(720px,calc(100vw - 24px));max-height:calc(100vh - 24px);box-shadow:0 20px 60px rgba(2,6,23,.4)}
+dialog::backdrop{background:rgba(2,6,23,.6)}
+.dlg{padding:22px;position:relative}
+.dlg .x{position:absolute;top:12px;right:12px;border:0;background:var(--soft);width:34px;height:34px;border-radius:8px;display:grid;place-items:center}
+.dlg h2{padding-right:40px;margin-bottom:12px;font-size:20px}
+.player{aspect-ratio:16/9;border-radius:10px;display:grid;place-items:center;color:#fff;text-align:center;padding:16px;margin-bottom:14px}
+.player .big{width:64px;height:64px;border-radius:50%;background:rgba(255,255,255,.18);display:grid;place-items:center;margin:0 auto 10px;border:1px solid rgba(255,255,255,.4)}
+.toast{position:fixed;bottom:20px;left:50%;transform:translateX(-50%) translateY(20px);background:var(--navy);color:#fff;padding:10px 16px;border-radius:10px;opacity:0;pointer-events:none;transition:.2s;z-index:100;border:1px solid var(--gold);max-width:calc(100vw - 32px);font-weight:500}
+.toast.on{opacity:1;transform:translateX(-50%)}
+.tip{position:fixed;z-index:90;background:var(--navy);color:#fff;padding:6px 10px;border-radius:8px;font-size:12.5px;pointer-events:none;display:none;border:1px solid #334155}
+svg.chart{width:100%;height:auto;display:block}
+svg.chart text{fill:var(--muted);font-size:11px;font-family:inherit}
+svg.chart .grid{stroke:var(--border)}
+svg.chart rect.b{cursor:pointer;transition:opacity .15s}svg.chart rect.b:hover{opacity:.8}
+.legend{display:flex;gap:16px;font-size:12.5px;margin-top:8px}.legend i{display:inline-block;width:11px;height:11px;border-radius:3px;margin-right:6px;vertical-align:-1px}
+</style>
+</head>
+<body>
+<a class="sr" href="#content">Skip to content</a>
+<div class="topbar">
+  <button class="icon-btn" data-act="menu" aria-label="Open navigation menu" data-testid="button-menu"></button>
+  <div class="logo" style="width:30px;height:30px;font-size:13px">LO</div><b>Academy</b>
+</div>
+<div class="scrim" data-act="menu-close"></div>
+<aside class="sidebar" id="sidebar" aria-label="Primary">
+  <div class="brand">
+    <div class="logo" aria-hidden="true">LO</div><b>Academy</b>
+    <button class="icon-btn" data-act="theme" aria-label="Toggle light and dark theme" data-testid="button-theme-toggle"></button>
+  </div>
+  <nav class="main" id="nav" aria-label="Main navigation"></nav>
+  <div class="profile">
+    <div class="avatar" aria-hidden="true">AR</div>
+    <div class="who"><b>Alex Rivera</b><span>Rank #4</span></div>
+    <button class="icon-btn" data-act="bell" aria-label="Notifications (demo)" data-testid="button-notifications"></button>
+  </div>
+</aside>
+<main id="content" tabindex="-1"><div id="view"></div></main>
+<dialog id="dlg" aria-labelledby="dlg-title"><div class="dlg" id="dlg-body"></div></dialog>
+<div class="toast" id="toast" role="status" aria-live="polite"></div>
+<div class="tip" id="tip" role="tooltip"></div>
+
+<script>
+"use strict";
+/* ---------- helpers ---------- */
+const $=(s,r=document)=>r.querySelector(s), $$=(s,r=document)=>[...r.querySelectorAll(s)];
+const esc=s=>String(s).replace(/[&<>"']/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c]));
+const I={
+"layout-dashboard":'<rect width="7" height="9" x="3" y="3" rx="1"/><rect width="7" height="5" x="14" y="3" rx="1"/><rect width="7" height="9" x="14" y="12" rx="1"/><rect width="7" height="5" x="3" y="16" rx="1"/>',
+"book-open":'<path d="M2 3h6a4 4 0 0 1 4 4v14a3 3 0 0 0-3-3H2z"/><path d="M22 3h-6a4 4 0 0 0-4 4v14a3 3 0 0 1 3-3h7z"/>',
+"play-square":'<rect width="18" height="18" x="3" y="3" rx="2"/><path d="m9 8 6 4-6 4Z"/>',
+trophy:'<path d="M6 9H4.5a2.5 2.5 0 0 1 0-5H6"/><path d="M18 9h1.5a2.5 2.5 0 0 0 0-5H18"/><path d="M4 22h16"/><path d="M10 14.66V17c0 .55-.47.98-.97 1.21C7.85 18.75 7 20.24 7 22"/><path d="M14 14.66V17c0 .55.47.98.97 1.21C16.15 18.75 17 20.24 17 22"/><path d="M18 2H6v7a6 6 0 0 0 12 0V2Z"/>',
+target:'<circle cx="12" cy="12" r="10"/><circle cx="12" cy="12" r="6"/><circle cx="12" cy="12" r="2"/>',
+"message-square":'<path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/>',
+"phone-call":'<path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07 19.5 19.5 0 0 1-6-6 19.79 19.79 0 0 1-3.07-8.67A2 2 0 0 1 4.11 2h3a2 2 0 0 1 2 1.72c.127.96.361 1.903.7 2.81a2 2 0 0 1-.45 2.11L8.09 9.91a16 16 0 0 0 6 6l1.27-1.27a2 2 0 0 1 2.11-.45c.907.339 1.85.573 2.81.7A2 2 0 0 1 22 16.92z"/>',
+user:'<path d="M19 21v-2a4 4 0 0 0-4-4H9a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/>',
+"folder-open":'<path d="m6 14 1.5-2.9A2 2 0 0 1 9.24 10H20a2 2 0 0 1 1.94 2.5l-1.54 6a2 2 0 0 1-1.95 1.5H4a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h3.9a2 2 0 0 1 1.69.9l.81 1.2a2 2 0 0 0 1.67.9H18a2 2 0 0 1 2 2v2"/>',
+moon:'<path d="M12 3a6 6 0 0 0 9 9 9 9 0 1 1-9-9Z"/>',
+sun:'<circle cx="12" cy="12" r="4"/><path d="M12 2v2M12 20v2M4.93 4.93l1.41 1.41M17.66 17.66l1.41 1.41M2 12h2M20 12h2M6.34 17.66l-1.41 1.41M19.07 4.93l-1.41 1.41"/>',
+bell:'<path d="M6 8a6 6 0 0 1 12 0c0 7 3 9 3 9H3s3-2 3-9"/><path d="M10.3 21a1.94 1.94 0 0 0 3.4 0"/>',
+menu:'<path d="M4 6h16M4 12h16M4 18h16"/>',x:'<path d="M18 6 6 18M6 6l12 12"/>',
+play:'<polygon points="6 3 20 12 6 21 6 3"/>',check:'<path d="M20 6 9 17l-5-5"/>',
+lock:'<rect width="18" height="11" x="3" y="11" rx="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/>',
+copy:'<rect width="14" height="14" x="8" y="8" rx="2"/><path d="M4 16c-1.1 0-2-.9-2-2V4c0-1.1.9-2 2-2h10c1.1 0 2 .9 2 2"/>',
+bookmark:'<path d="m19 21-7-4-7 4V5a2 2 0 0 1 2-2h10a2 2 0 0 1 2 2v16z"/>',
+up:'<path d="m5 12 7-7 7 7M12 19V5"/>',down:'<path d="M12 5v14M19 12l-7 7-7-7"/>',
+download:'<path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4M7 10l5 5 5-5M12 15V3"/>',
+search:'<circle cx="11" cy="11" r="8"/><path d="m21 21-4.3-4.3"/>',
+calendar:'<rect width="18" height="18" x="3" y="4" rx="2"/><path d="M16 2v4M8 2v4M3 10h18"/>',
+clock:'<circle cx="12" cy="12" r="10"/><path d="M12 6v6l4 2"/>',
+zap:'<polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2"/>',
+users:'<path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M22 21v-2a4 4 0 0 0-3-3.87M16 3.13a4 4 0 0 1 0 7.75"/>',
+award:'<circle cx="12" cy="8" r="6"/><path d="M15.477 12.89 17 22l-5-3-5 3 1.523-9.11"/>',
+grad:'<path d="M22 10 12 5 2 10l10 5 10-5z"/><path d="M6 12v5c3 3 9 3 12 0v-5"/>',
+shield:'<path d="M20 13c0 5-3.5 7.5-7.66 8.95a1 1 0 0 1-.67-.01C7.5 20.5 4 18 4 13V6a1 1 0 0 1 1-1c2 0 4.5-1.2 6.24-2.72a1.17 1.17 0 0 1 1.52 0C14.51 3.81 17 5 19 5a1 1 0 0 1 1 1z"/><path d="m9 12 2 2 4-4"/>',
+crown:'<path d="m2 4 3 12h14l3-12-6 7-4-7-4 7-6-7zM5 20h14"/>',
+file:'<path d="M15 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V7z"/><path d="M14 2v4a2 2 0 0 0 2 2h4M10 9H8M16 13H8M16 17H8"/>',
+calc:'<rect width="16" height="20" x="4" y="2" rx="2"/><path d="M8 6h8M16 14v4M16 10h.01M12 10h.01M8 10h.01M12 14h.01M8 14h.01M12 18h.01M8 18h.01"/>',
+trend:'<path d="m22 7-8.5 8.5-5-5L2 17M16 7h6v6"/>',
+image:'<rect width="18" height="18" x="3" y="3" rx="2"/><circle cx="9" cy="9" r="2"/><path d="m21 15-3.1-3.1a2 2 0 0 0-2.8 0L6 21"/>',
+mail:'<rect width="20" height="16" x="2" y="4" rx="2"/><path d="m22 7-10 5L2 7"/>',
+plus:'<path d="M5 12h14M12 5v14"/>',
+left:'<path d="m15 18-6-6 6-6"/>',right:'<path d="m9 18 6-6-6-6"/>',
+star:'<polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/>',
+info:'<circle cx="12" cy="12" r="10"/><path d="M12 16v-4M12 8h.01"/>',
+dollar:'<path d="M12 2v20M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"/>',
+layers:'<polygon points="12 2 2 7 12 12 22 7 12 2"/><path d="m2 17 10 5 10-5M2 12l10 5 10-5"/>',
+clipboard:'<rect width="8" height="4" x="8" y="2" rx="1"/><path d="M16 4h2a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2V6a2 2 0 0 1 2-2h2"/>',
+};
+const ic=(n,c="")=>`<svg class="ic ${c}" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">${I[n]||""}</svg>`;
+const ini=n=>n.split(" ").map(w=>w[0]).slice(0,2).join("").toUpperCase();
+const money=n=>"$"+Number(n).toLocaleString("en-US");
+const slug=s=>s.toLowerCase().replace(/[^a-z0-9]+/g,"-").replace(/^-|-$/g,"");
+const pad=n=>String(n).padStart(2,"0");
+const dkey=d=>`${d.getFullYear()}-${pad(d.getMonth()+1)}-${pad(d.getDate())}`;
+const dstr=(d,o)=>d.toLocaleDateString("en-US",o||{weekday:"long",month:"long",day:"numeric"});
+const addDays=(d,n)=>{const x=new Date(d);x.setDate(x.getDate()+n);return x};
+const today=()=>{const d=new Date();d.setHours(0,0,0,0);return d};
+
+/* ---------- data ---------- */
+const NAV=[["/","Dashboard","layout-dashboard"],["/book-club","Book Club","book-open"],["/videos","Video Library","play-square"],["/champions","Champions","trophy"],["/business-plan","Business Plan","target"],["/community","Community","message-square"],["/sales-coaching","Sales Coaching","phone-call"],["/coach-lee","Coach with Lee","user"],["/resources","Resources","folder-open"]];
+const VIDEOS=[
+["The 3-Call Close System","Closing","45:20",100,"A repeatable three-conversation structure: discover, confirm the plan, and set expectations for the path to closing."],
+["Building Your Realtor Network in 90 Days","Agent Relationships","55:10",30,"A 90-day outline for finding, meeting, and serving agents with a consistent weekly rhythm."],
+["Mastering the Rate Lock Explanation","Rate Strategy","30:15",0,"Plain-language ways to explain what a rate lock is, what it covers, and what questions to ask the lender."],
+["High-Conversion Prospecting Routines","Prospecting","42:00",60,"Build a daily prospecting block, track your contacts, and review the numbers that actually move your pipeline."],
+["Navigating Tricky Appraisals","Underwriting","35:45",0,"How to prepare borrowers and agents for appraisal timelines, and what options may exist when value comes in low."],
+["Compliance Basics for New LOs","Compliance","60:00",15,"An orientation to the compliance habits new originators build early. Always follow your company policy and counsel."],
+["Selling Against the Big Banks","Closing","48:30",0,"Position service, communication, and local expertise honestly without disparaging competitors."],
+["Social Media for Mortgage Pros","Prospecting","52:15",0,"A simple content calendar, compliant disclaimers, and conversation starters that fit a loan officer's brand."],
+["Understanding Non-QM Products","Underwriting","44:20",0,"An overview of when non-QM programs may fit a borrower profile and how to set expectations on pricing and documentation."],
+["Co-Branding Marketing with Agents","Agent Relationships","38:50",0,"Plan joint marketing that follows lender approval, cost-sharing rules, and your company's compliance review."],
+["Daily Rate Sheet Analysis","Rate Strategy","25:10",80,"A fast routine to read the daily rate sheet, spot changes, and prepare talking points for your active borrowers."],
+["RESPA Do's and Don'ts","Compliance","40:00",0,"A learning refresher on referral and settlement service topics. This is not legal advice or formal certification."]
+].map((v,i)=>({id:i,title:v[0],cat:v[1],dur:v[2],prog:v[3],desc:v[4]}));
+const VCATS=["All","Prospecting","Underwriting","Rate Strategy","Agent Relationships","Closing","Compliance"];
+const tcls=c=>"t-"+c.split(" ")[0];
+const LEADERS=[[1,"Sarah Chen","West Coast Group",14,4200],[2,"Marcus Johnson","Texas Premier",12,3850],[3,"Elena Rodriguez","Miami Metro",11,3500],[4,"Alex Rivera","Northeast Region",7,2800],[5,"David Kim","Chicago North",6,2650],[6,"Jessica Taylor","Dallas Central",6,2400],[7,"Ryan Patel","Atlanta First",5,2100],[8,"Amanda White","Seattle Tech",4,1850],[9,"Thomas Wright","Denver High",4,1600],[10,"Olivia Martinez","Phoenix Sun",3,1200]];
+const CHALLENGES=[["Pre-Approval Sprint","Issue 10 pre-approvals this month","7 of 10",70,"6 days left"],["Fastest Close Challenge","Bring average days-to-close down to 25","28 days avg, goal 25",78,"9 days left"],["Realtor Relationship Builder","Add 5 new agent partners","3 of 5",60,"12 days left"]];
+const BADGES=[["Fast Starter","Closed first 3 loans in 30 days",1,"zap"],["Networker","Added 5 new Realtor partners",1,"users"],["Bookworm","Read 5 training books",0,"book-open"],["Volume King","$5M pipeline in one month",0,"crown"],["Perfect Pitch","Completed all sales scripts",1,"phone-call"],["Scholar","50 hours of video training",0,"grad"],["Compliance Pro","Passed annual test 100%",1,"shield"],["Top 10","Reached top 10 on leaderboard",1,"trophy"]];
+const POSTS=[
+["Handling the “Rates are too high right now” objection","Sarah Chen","Rate Talk",124,45,"2h ago","I start by agreeing that affordability is a real concern, then ask what monthly payment feels comfortable. From there we can look at price range, buydown options, and a plan to revisit if conditions change. I never promise where rates will go.",[["Marcus Johnson","Asking about the comfortable payment first changed my calls completely."],["Ryan Patel","I send a one-page scenario comparing today with a possible refinance later, clearly labeled as an example."]]],
+["My new agent drip campaign that generated 3 referrals","Marcus Johnson","Agent Scripts",89,22,"4h ago","Six short emails over twelve weeks: a local market note, a buyer education tip, a financing checklist, and a simple thank you. Replies came from agents who liked having something useful to forward to clients. Everything went through our compliance review first.",[["Elena Rodriguez","Did you include co-branded pieces? We need lender approval for those."],["Marcus Johnson","Yes, approved version only, and no cost sharing."]]],
+["Just closed my first $1M+ jumbo loan!","Alex Rivera","Wins",215,56,"5h ago","It took three weeks of clear communication about documentation and timelines. The biggest lesson was setting expectations on the appraisal and reserves early. Thanks to everyone here who shared checklists.",[["Sarah Chen","Congratulations! Jumbo files reward organization."],["David Kim","Great work. Would love to see your document checklist."]]],
+["Question about non-warrantable condos","David Kim","General",12,8,"1d ago","I have a buyer interested in a condo that may be non-warrantable. What questions do you ask the HOA and agent up front to avoid surprises? Program guidelines vary by lender, so I am looking for process tips.",[["Jessica Taylor","Ask for the HOA questionnaire and budget early, then confirm with your underwriter."]]],
+["Coach Lee: Best practices for Monday morning pipeline reviews?","Elena Rodriguez","Ask the Coach",45,12,"1d ago","I want a 30 minute Monday routine for my pipeline. What should I look at first, and how do you decide who gets a call that day?",[["Lee Thompson","Start with deadlines in the next seven days, then stalled files, then new leads. Pick three calls and block the time before you open email."]]],
+["Favorite CRM automations for past clients?","Jessica Taylor","General",67,34,"2d ago","Looking for simple automations that feel personal: anniversary notes, annual mortgage review reminders, and birthday check-ins. What has worked for you?",[["Thomas Wright","An annual review reminder created more repeat business than anything else for me."],["Olivia Martinez","Keep it short and human. Plain text emails perform best."]]],
+["Explaining the 2/1 Buydown simply","Ryan Patel","Rate Talk",156,41,"2d ago","I say: the payment starts lower for the first two years and steps up to the note rate, and the cost is funded up front by someone, such as a seller concession where allowed. Then I show the payment table. Borrowers must still qualify as lender guidelines require.",[["Sarah Chen","Showing the year-by-year payment table makes it click."],["Amanda White","Good reminder to mention qualification at the note rate."]]],
+["Open house strategy: what actually works","Thomas Wright","Agent Scripts",92,28,"3d ago","I offer to attend with a simple financing one-pager and a sign-in that asks permission to follow up. Agents appreciate a partner who adds value to the visitors without being pushy.",[["Elena Rodriguez","Permission-based follow up is key."]]]
+].map((p,i)=>({id:"p"+i,title:p[0],author:p[1],cat:p[2],votes:p[3],comments:p[4],time:p[5],body:p[6],replies:p[7]}));
+const PCATS=["All","General","Rate Talk","Agent Scripts","Wins","Ask the Coach"];
+const SCRIPTS=[
+["First Contact","Hi [Name], this is [Your Name] with [Company]. Are you just exploring homes in [Area], or planning to make a move soon?\n\n[Listen]\n\nThanks for sharing that. Many buyers find it helpful to understand their budget before touring. Would a quick 10 minute call to walk through the process be useful?"],
+["Follow-Up Call","Hi [Name], it is [Your Name] from [Company]. I wanted to follow up on our last conversation about buying in [Area]. Has anything changed with your timeline or the homes you have been looking at?\n\nIf it helps, I can update your estimated payment range so you can shop with confidence."],
+["Objection Handling: Rates","I hear you, [Name]. Rates are a real factor in monthly payment. Can I ask what payment would feel comfortable for you?\n\nLet us look at a few options together, including different price points and possible buydown strategies. If conditions change in the future, we can review a refinance then. I cannot predict future rates, but I can make sure you have a plan."],
+["Pre-Approval Pitch","[Name], a pre-approval helps you shop with a clear budget and shows sellers you are serious. It starts with a short conversation and a review of income, assets, and credit. Final approval depends on full documentation and underwriting.\n\nWould tomorrow morning or afternoon be better for 15 minutes?"],
+["Rate Lock Explanation","A rate lock is an agreement with the lender to hold a specific rate for a set period, assuming the loan details stay the same. Locking protects you from market changes during that period. Lock length, cost, and any float-down option depend on lender policy and your situation, so let me confirm the details for your loan before we decide."],
+["Closing","[Name], we are almost at the finish line. Here is what to expect this week: final review of your loan documents, confirming your closing time with the title company, and bringing a valid ID and funds as instructed. Please call me with any questions. Closing dates depend on completing all conditions."]
+].map(s=>({t:s[0],b:s[1]}));
+const DRIPS=[["Post-Close 1 Year Touch","Past Clients",12,"Active"],["Realtor Value Add Weekly","Agent Partners",52,"Active"],["Pre-Approval Nurture (No Contract)","Pre-Approved Buyers",8,"Active"],["First-Time Buyer Education","New Leads",6,"Paused"],["Rate Drop Refi Alert","Past Clients (>6.5%)",3,"Draft"]];
+const DRIP_SEQ={
+"Post-Close 1 Year Touch":[["Day 0","Congratulations on your new home"],["Day 30","Settling in: a quick checklist"],["Day 90","Home care tips for the season"],["Day 365","Your one-year mortgage check-in"]],
+"Realtor Value Add Weekly":[["Week 1","Local market snapshot for your listings"],["Week 2","Financing tip you can share with buyers"],["Week 3","Upcoming program updates"],["Week 4","How I can support your open houses"]],
+"Pre-Approval Nurture (No Contract)":[["Day 1","Your pre-approval: what it means"],["Day 4","Keep your finances steady while you shop"],["Day 10","Questions to ask when you find a home"],["Day 21","Ready to refresh your pre-approval?"]],
+"First-Time Buyer Education":[["Day 1","Welcome: the home buying roadmap"],["Day 5","Down payment options explained"],["Day 12","Understanding closing costs"]],
+"Rate Drop Refi Alert":[["Trigger","Rates have moved: is a review worthwhile?"],["+5 days","A simple refinance cost and savings worksheet"],["+14 days","Last check-in on your options"]]};
+const AGENTS=[
+["The Co-Branded Open House Flyer","Offer an approved co-branded flyer that gives visitors a clear next step. Keep claims factual, include required disclosures, and get lender approval before printing. Any shared marketing costs must follow RESPA and company policy."],
+["The Tuesday Update Call","A 10 minute weekly call with each top agent: new listings, buyer needs, and files that need attention. Consistency builds trust more than any single gesture."],
+["Lunch and Learn Education","Host a short educational session for an agent's office on topics like pre-approvals and appraisal timelines. Confirm that sponsorship rules and approvals are met first."],
+["Review and Reputation Collaboration","Encourage happy clients to share honest reviews for both you and the agent, and never offer anything of value in exchange. Respond to every review professionally."],
+["Post-Closing Gift Coordination","Coordinate thoughtful client gifts with the agent in a way that fits your compliance policy. Gifts to referral sources have limits, and paying for referrals is never acceptable."]];
+const RESOURCES=[["Daily Rate Sheet PDF","Rate Sheets & Tools","Example lender pricing reference","file"],["Loan Scenario Calculator","Rate Sheets & Tools","Quick payment comparison worksheet","calc"],["TRID Timeline Guide","Compliance","Disclosure timing learning reference","clock"],["State License Requirements","Compliance","Renewal and continuing-education checklist","shield"],["Social Media Graphics Pack","Marketing Templates","Mortgage marketing template examples","image"],["Email Signature Generator","Marketing Templates","Company-approved signature example","mail"],["Housing Market Analysis","Market Reports","Illustrative national and regional trends","trend"],["Buydown Analysis Tool","Calculators","Compare 3/2/1 and 2/1 scenarios","calc"]];
+const RCATS=["Rate Sheets & Tools","Compliance","Marketing Templates","Market Reports","Calculators"];
+const BOOKS=[["The Psychology of Persuasion","Robert B. Cialdini","4.9","c2"],["Fanatical Prospecting","Jeb Blount","4.7","c3"],["Atomic Habits","James Clear","4.9","c4"]];
+const BOOK_DISC=[["Coach Lee","Tactical empathy and calibrated questions","This week, try using one calibrated question (a question starting with “What” or “How”) in a borrower conversation and one with an agent. Share what you asked and how they responded."],];
+const BOOK_REPLIES0=[["Sarah Chen","I asked a buyer, “What would make this timeline feel comfortable?” and got more detail than any yes/no question gave me."],["David Kim","Labeling the concern first (“It sounds like the payment is the worry”) lowered the tension right away."],["Jessica Taylor","Tried it with an agent who was frustrated about a delayed appraisal. She calmed down fast."]];
+const TOPICS=["Prospecting Strategy","Agent Relationships","Pipeline Review","Sales Scripts","Business Plan Review"];
+const SLOTS=["9:00 AM","10:30 AM","1:00 PM","3:30 PM"];
+
+/* ---------- state ---------- */
+const KEY="loacademy.v1";
+const DEF={theme:null,goals:{loans:6,avg:485000,rev:220000},checks:[1,1,0,0,1,0,0,0],notes:"",progress:45,posts:[],votes:{},postReplies:{},bookReplies:[],bookings:[],saved:[]};
+let S=JSON.parse(JSON.stringify(DEF)),persisted=true;
+function load(){try{const r=localStorage.getItem(KEY);if(!r)return;const o=JSON.parse(r);if(!o||typeof o!=="object")return;
+  for(const k in DEF){if(k in o&&typeof o[k]===typeof DEF[k]&&(Array.isArray(DEF[k])===Array.isArray(o[k])))S[k]=o[k]}
+  const g=S.goals;if(!g||[g.loans,g.avg,g.rev].some(v=>typeof v!=="number"||!isFinite(v)||v<=0))S.goals={...DEF.goals};
+  if(S.checks.length!==8)S.checks=[...DEF.checks];
+  S.progress=Math.min(100,Math.max(0,Number(S.progress)||45));
+}catch(e){S=JSON.parse(JSON.stringify(DEF))}}
+function save(){try{localStorage.setItem(KEY,JSON.stringify(S));persisted=true}catch(e){persisted=false}}
+load();
+
+/* ---------- ui primitives ---------- */
+let toastT;
+function toast(m){const t=$("#toast");t.textContent=m;t.classList.add("on");clearTimeout(toastT);toastT=setTimeout(()=>t.classList.remove("on"),2800)}
+const dlg=$("#dlg");
+function openDlg(html){$("#dlg-body").innerHTML=`<button class="x" data-act="close" aria-label="Close dialog" data-testid="button-close-dialog">${ic("x")}</button>`+html;if(!dlg.open)dlg.showModal()}
+dlg.addEventListener("click",e=>{if(e.target===dlg)dlg.close()});
+const note=t=>`<div class="note">${ic("info")}<span>${t}</span></div>`;
+
+/* ---------- charts ---------- */
+function niceMax(v){const p=Math.pow(10,Math.floor(Math.log10(v)));const n=v/p;return (n<=1?1:n<=2?2:n<=2.5?2.5:n<=5?5:10)*p}
+function barChart(labels,series,o){
+  const W=640,H=300,L=52,B=32,T=12,R=10,iw=W-L-R,ih=H-T-B;
+  const max=niceMax(Math.max(...series.flatMap(s=>s.data))*1.05||1),ticks=5,n=labels.length,gw=iw/n,sw=Math.min(36,gw*.7/series.length);
+  let g="";
+  for(let i=0;i<=ticks;i++){const v=max*i/ticks,y=T+ih-ih*i/ticks;g+=`<line class="grid" x1="${L}" x2="${W-R}" y1="${y}" y2="${y}"/><text x="${L-8}" y="${y+4}" text-anchor="end">${o.fmt(v)}</text>`}
+  labels.forEach((lb,i)=>{const cx=L+gw*i+gw/2;g+=`<text x="${cx}" y="${H-10}" text-anchor="middle">${esc(lb)}</text>`;
+    series.forEach((s,j)=>{const v=s.data[i],h=ih*v/max,x=cx-sw*series.length/2+sw*j,y=T+ih-h,tip=`${lb}: ${s.name?s.name+" ":""}${o.fmt(v)}`;
+      g+=`<rect class="b" x="${x+1}" y="${y}" width="${sw-2}" height="${Math.max(h,0)}" rx="4" fill="${s.color}" tabindex="0" data-tip="${esc(tip)}" aria-label="${esc(tip)}"/>`})});
+  return `<svg class="chart" viewBox="0 0 ${W} ${H}" role="img" aria-label="${esc(o.label)}">${g}</svg>`;
+}
+const tip=$("#tip");
+document.addEventListener("mouseover",e=>{const t=e.target.closest("[data-tip]");if(!t)return;tip.textContent=t.dataset.tip;tip.style.display="block"});
+document.addEventListener("mousemove",e=>{if(tip.style.display==="block"){tip.style.left=Math.min(e.clientX+12,innerWidth-tip.offsetWidth-8)+"px";tip.style.top=(e.clientY-36)+"px"}});
+document.addEventListener("mouseout",e=>{if(e.target.closest("[data-tip]"))tip.style.display="none"});
+document.addEventListener("focusin",e=>{const t=e.target.closest&&e.target.closest("[data-tip]");if(!t)return;const r=t.getBoundingClientRect();tip.textContent=t.dataset.tip;tip.style.display="block";tip.style.left=r.left+"px";tip.style.top=(r.top-36)+"px"});
+document.addEventListener("focusout",()=>tip.style.display="none");
+
+/* ---------- pages ---------- */
+const head=(t,s)=>`<div class="ph"><h1>${t}</h1>${s?`<p>${s}</p>`:""}</div>`;
+const VOL=[["Jan",2.1],["Feb",2.4],["Mar",2.8],["Apr",3.1],["May",3.4],["Jun",3.2]];
+const P={};
+P["/"]=()=>{
+  const stats=[["Loans Closed (MTD)","7","loans","layers",0],["Pipeline Value","$3.2M","pipeline","dollar",0],["Training Hours","24","hours","clock",0],["Academy Rank","#4","rank","trophy",1]];
+  const act=[["Watched “The 3-Call Close System”","2h ago","play-square"],["Started “Never Split the Difference”","4h ago","book-open"],["Reached Top 5 on the Leaderboard","1d ago","trophy"]];
+  const quick=[["/book-club","Book Club","Continue the current read","book-open"],["/videos","Video Library","Browse 12 training lessons","play-square"],["/business-plan","Business Plan","Review goals and weekly actions","target"],["/champions","Leaderboard","See where you rank","trophy"]];
+  return head("Welcome back, Alex",`“Success is not final, failure is not fatal: it is the courage to continue that counts.” <span class="small">- Winston Churchill</span>`)+
+  `<div class="grid g4" style="margin-bottom:18px">${stats.map(s=>`<div class="card"><div class="stat"><div><div class="lbl">${s[0]}</div><div class="val" data-testid="text-stat-${s[2]}">${s[1]}</div></div><div class="ico ${s[4]?"gold":""}">${ic(s[3],"")}</div></div></div>`).join("")}</div>
+  <div class="grid g21" style="margin-bottom:18px">
+    <div class="card"><h2>Monthly Loan Volume ($M)</h2>${barChart(VOL.map(v=>v[0]),[{name:"",data:VOL.map(v=>v[1]),color:"var(--chart1)"}],{fmt:v=>"$"+(Math.round(v*10)/10)+"M",label:"Bar chart of monthly loan volume in millions of dollars"})}
+    <p class="small muted" style="margin-top:8px" data-testid="text-volume-summary">Summary: ${VOL.map(v=>v[0]+" $"+v[1]+"M").join(", ")}. Sample data.</p></div>
+    <div class="card"><h2>Recent Activity</h2>${act.map((a,i)=>`<div class="row" style="padding:11px 0;${i?"border-top:1px solid var(--border)":""}"><div class="ico" style="width:34px;height:34px;border-radius:9px;background:var(--soft);display:grid;place-items:center;flex:none">${ic(a[2])}</div><div class="grow"><div style="font-weight:600">${a[0]}</div><div class="small muted">${a[1]}</div></div></div>`).join("")}</div>
+  </div>
+  <h2 style="font-size:18px;margin-bottom:12px">Quick Access</h2>
+  <div class="grid g4">${quick.map(q=>`<a href="#${q[0]}" class="card hover" data-testid="link-quick-${slug(q[1])}"><div class="ico" style="width:38px;height:38px;border-radius:10px;background:#fbf1d3;color:var(--gold-d);display:grid;place-items:center;margin-bottom:12px">${ic(q[3])}</div><h3>${q[1]}</h3><p class="small muted">${q[2]}</p></a>`).join("")}</div>
+  <p class="small muted" style="margin-top:18px">All figures on this page are sample demo data.</p>`;
+};
+const replyHTML=(a,t)=>`<div class="reply"><div class="avatar sm" aria-hidden="true">${ini(a)}</div><div><b>${esc(a)}</b><div>${esc(t)}</div></div></div>`;
+P["/book-club"]=()=>{
+  const replies=[...BOOK_REPLIES0,...S.bookReplies];
+  return head("Book Club","Read together, discuss with the team, and put one idea to work each week.")+
+  `<div class="card" style="margin-bottom:18px"><div class="row wrap" style="gap:24px;align-items:flex-start">
+    <div class="cover" aria-hidden="true"><span>Current read</span><b>Never Split the Difference</b><span>Chris Voss</span></div>
+    <div class="grow" style="min-width:240px"><span class="badge gold">Currently reading</span>
+    <h2 style="font-size:26px;margin:10px 0 2px">Never Split the Difference</h2><p class="muted">by Chris Voss</p>
+    <div class="row" style="margin:10px 0">${ic("star","")}<b data-testid="text-book-rating">4.8/5</b><span class="muted small">member rating</span></div>
+    <div class="row between small"><span>Reading progress</span><b data-testid="text-book-progress">${S.progress}%</b></div>
+    <div class="bar" role="progressbar" aria-valuenow="${S.progress}" aria-valuemin="0" aria-valuemax="100" aria-label="Reading progress"><i style="width:${S.progress}%"></i></div>
+    <div class="row wrap" style="margin-top:16px"><button class="btn primary" data-act="book-progress" ${S.progress>=100?"disabled":""} data-testid="button-continue-reading">${ic("book-open")} Log 5% reading progress</button><a class="btn" href="#notes" data-act="goto-notes" data-testid="button-open-notes">${ic("clipboard")} Open notes</a></div></div></div></div>
+  <div class="grid g2" style="margin-bottom:18px">
+   <div class="card" id="discussion"><h2>This Week’s Discussion</h2>
+    <div class="row" style="align-items:flex-start;margin-bottom:8px"><div class="avatar md">LT</div><div><b>Coach Lee</b> <span class="badge gold">Coach</span><p style="margin-top:4px"><b>${BOOK_DISC[0][1]}</b></p><p class="muted" style="margin-top:4px">${BOOK_DISC[0][2]}</p></div></div>
+    <div id="book-replies">${replies.map(r=>replyHTML(r[0],r[1])).join("")}</div>
+    <form data-form="book-reply" novalidate style="margin-top:12px"><div class="field"><label for="br">Your reply</label><textarea id="br" name="text" placeholder="Share how you used it..." data-testid="input-book-reply"></textarea><div class="err" role="alert"></div></div><button class="btn primary" type="submit" data-testid="button-book-reply">Post reply</button></form>
+    ${note("Replies are stored only in this browser and are not shared with others.")}</div>
+   <div class="card" id="notes"><h2>My Notes</h2><div class="field"><label for="nt">Personal reading notes (use your own words)</label><textarea id="nt" style="min-height:220px" data-input="notes" placeholder="Key ideas, questions, and things to try this week..." data-testid="input-book-notes">${esc(S.notes)}</textarea></div>${note("Notes save automatically in this browser only.")}</div>
+  </div>
+  <h2 style="font-size:18px;margin-bottom:12px">Past Books</h2>
+  <div class="grid g3">${BOOKS.map(b=>`<div class="card hover row" style="gap:16px"><div class="cover sm ${b[3]}" aria-hidden="true"><b>${b[0]}</b><span>${b[1].split(" ").pop()}</span></div><div><h3>${b[0]}</h3><p class="muted small">${b[1]}</p><div class="row" style="margin:8px 0">${ic("star")}<b>${b[2]}/5</b></div><span class="badge ok">${ic("check","")} Completed</span></div></div>`).join("")}</div>`;
+};
+let vf="All";
+P["/videos"]=()=>{
+  const list=VIDEOS.filter(v=>vf==="All"||v.cat===vf);
+  return head("Video Library","Twelve sample lessons across prospecting, underwriting, rates, agent relationships, closing, and compliance.")+
+  `<div class="tabs" role="tablist" aria-label="Video categories">${VCATS.map(c=>`<button class="tab" role="tab" aria-selected="${c===vf}" data-act="vfilter" data-v="${c}" data-testid="tab-video-${slug(c)}">${c}</button>`).join("")}</div>
+  <div class="grid g3" data-testid="grid-videos">${list.map(v=>`<button class="card hover" style="text-align:left;padding:14px" data-act="vopen" data-id="${v.id}" data-testid="card-video-${v.id}"><div class="thumb ${tcls(v.cat)}"><div class="pl"><span>${ic("play")}</span></div><span class="dur">${v.dur}</span>${v.prog?`<div class="pg"><i style="width:${v.prog}%"></i></div>`:""}</div><div style="margin-top:12px"><span class="badge">${v.cat}</span><h3 style="margin-top:8px">${v.title}</h3>${v.prog?`<p class="small muted" style="margin-top:4px">${v.prog===100?"Completed":v.prog+"% watched"} (sample)</p>`:""}</div></button>`).join("")}</div>`;
+};
+function videoDialog(id){
+  const v=VIDEOS[id],rel=VIDEOS.filter(x=>x.cat===v.cat&&x.id!==id).concat(VIDEOS.filter(x=>x.cat!==v.cat&&x.id!==id)).slice(0,3);
+  openDlg(`<h2 id="dlg-title">${v.title}</h2><div class="player ${tcls(v.cat)}"><div><div class="big">${ic("play")}</div><b>Demo player placeholder</b><div class="small" style="opacity:.85">No video file is included. Playback is not available in this demo.</div></div></div>
+  <div class="row wrap" style="margin-bottom:10px"><span class="badge">${v.cat}</span><span class="badge">${ic("clock")} ${v.dur}</span></div>
+  <p>${v.desc}</p><h3 style="margin:18px 0 8px">Related lessons</h3>
+  <div class="stack" style="gap:8px">${rel.map(r=>`<button class="btn" style="justify-content:space-between" data-act="vopen" data-id="${r.id}" data-testid="button-related-${r.id}"><span>${r.title}</span><span class="muted small">${r.dur}</span></button>`).join("")}</div>`);
+}
+P["/champions"]=()=>head("Champion Success","Sample national leaderboard, active challenges, and your badge collection. Demo data only.")+
+  `<div class="card" style="margin-bottom:18px"><h2>National Leaderboard</h2><div class="tbl-wrap"><table><caption class="sr">National leaderboard</caption><thead><tr><th>Rank</th><th>Name</th><th>Branch</th><th class="num">Loans Closed</th><th class="num">Points</th></tr></thead><tbody>
+  ${LEADERS.map(l=>`<tr class="${l[1]==="Alex Rivera"?"me":""}" data-testid="row-leader-${l[0]}"><td><span class="rk ${l[0]<=3?"r"+l[0]:""}">${l[0]}</span>${l[0]<=3?`<span class="sr">${["Gold","Silver","Bronze"][l[0]-1]}</span>`:""}</td><td><div class="row"><div class="avatar sm">${ini(l[1])}</div><b>${l[1]}</b>${l[1]==="Alex Rivera"?'<span class="badge gold">You</span>':""}</div></td><td>${l[2]}</td><td class="num">${l[3]}</td><td class="num"><b>${l[4].toLocaleString()}</b></td></tr>`).join("")}</tbody></table></div></div>
+  <h2 style="font-size:18px;margin-bottom:12px">Active Challenges <span class="badge">Demo competitions</span></h2>
+  <div class="grid g3" style="margin-bottom:22px">${CHALLENGES.map((c,i)=>`<div class="card"><h3>${c[0]}</h3><p class="muted small" style="margin:4px 0 12px">${c[1]}</p><div class="row between small"><b>${c[2]}</b><span>${c[3]}%</span></div><div class="bar" role="progressbar" aria-valuenow="${c[3]}" aria-valuemin="0" aria-valuemax="100" aria-label="${c[0]} progress"><i style="width:${c[3]}%"></i></div><p class="small muted" style="margin-top:8px">${ic("clock","")} ${c[4]}</p></div>`).join("")}</div>
+  <h2 style="font-size:18px;margin-bottom:12px">My Badges <span class="muted small">(${BADGES.filter(b=>b[2]).length} of ${BADGES.length} earned)</span></h2>
+  <div class="grid g4">${BADGES.map(b=>`<div class="card badge-tile ${b[2]?"":"locked"}" data-testid="badge-${slug(b[0])}"><div class="bi">${ic(b[2]?b[3]:"lock")}</div><h3>${b[0]}</h3><p class="small muted" style="margin:4px 0 8px">${b[1]}</p><span class="badge ${b[2]?"ok":""}">${b[2]?"Earned":"Locked"}</span></div>`).join("")}</div>`;
+const WEEK=["Call 10 Realtor partners","Follow up with pre-approved buyers","Complete one training lesson","Review the current book chapter","Review active pipeline milestones","Prepare an open-house financing conversation","Schedule one agent relationship meeting","Send a past-client check-in"];
+const QT=[["Q1",12,15],["Q2",18,18],["Q3",14,20],["Q4",0,22]];
+const CHAN=[["Realtor Partners","34 touches this month",82,"On track"],["Referrals","9 introductions",68,"On track"],["Social Media","14 posts, 5 conversations",45,"Needs attention"],["Open Houses","3 attended, 21 visitors",55,"Building"]];
+P["/business-plan"]=()=>{
+  const g=S.goals,vol=g.loans*12*g.avg,done=S.checks.filter(Boolean).length;
+  return head("Business Plan","Set goals, track quarterly results, and stay on top of weekly actions.")+
+  `<div class="grid g2" style="margin-bottom:18px">
+   <div class="card"><h2>Annual Goals</h2><form data-form="goals" novalidate>
+    <div class="field"><label for="g1">Target loans per month</label><input id="g1" type="number" min="1" step="1" name="loans" value="${g.loans}" data-testid="input-goal-loans"></div>
+    <div class="field"><label for="g2">Average loan size ($)</label><input id="g2" type="number" min="1" step="1000" name="avg" value="${g.avg}" data-testid="input-goal-avg"></div>
+    <div class="field"><label for="g3">Annual revenue goal ($)</label><input id="g3" type="number" min="1" step="1000" name="rev" value="${g.rev}" data-testid="input-goal-rev"></div>
+    <div class="err" role="alert" id="goal-err"></div>
+    <button class="btn primary" type="submit" data-testid="button-save-goals">Save Goals</button>
+    <p class="small muted" style="margin-top:10px">Implied annual volume: <b data-testid="text-implied-volume">${money(vol)}</b> (${g.loans*12} loans x ${money(g.avg)})</p>
+    ${note("Goals are saved in this browser only. Nothing is sent to a server.")}</form></div>
+   <div class="card"><h2>Quarterly Progress (loans)</h2>${barChart(QT.map(q=>q[0]),[{name:"Actual",data:QT.map(q=>q[1]),color:"var(--chart1)"},{name:"Target",data:QT.map(q=>q[2]),color:"var(--chart2)"}],{fmt:v=>String(Math.round(v)),label:"Grouped bar chart of actual versus target loans by quarter"})}
+    <div class="legend"><span><i style="background:var(--chart1)"></i>Actual</span><span><i style="background:var(--chart2)"></i>Target</span></div>
+    <p class="small muted" style="margin-top:8px">${QT.map(q=>`${q[0]}: ${q[1]} of ${q[2]}`).join(" | ")}. Sample data.</p></div></div>
+  <div class="grid g2">
+   <div class="card"><div class="row between"><h2 style="margin:0">Weekly Action Items</h2><span class="badge gold" data-testid="text-checklist-count">${done} of ${WEEK.length} done</span></div><div class="bar" style="margin:12px 0"><i style="width:${done/WEEK.length*100}%"></i></div>
+    ${WEEK.map((w,i)=>`<label class="check"><input type="checkbox" data-act="check" data-i="${i}" ${S.checks[i]?"checked":""} data-testid="checkbox-week-${i}"><span>${w}</span></label>`).join("")}</div>
+   <div class="card"><h2>Marketing Channels</h2>${CHAN.map(c=>`<div style="padding:10px 0;border-bottom:1px solid var(--border)"><div class="row between"><b>${c[0]}</b><span class="badge ${c[3]==="On track"?"ok":c[3]==="Needs attention"?"warn":""}">${c[3]}</span></div><div class="small muted" style="margin:2px 0 8px">${c[1]}</div><div class="bar navy" role="progressbar" aria-valuenow="${c[2]}" aria-valuemin="0" aria-valuemax="100" aria-label="${c[0]} goal progress"><i style="width:${c[2]}%"></i></div></div>`).join("")}<p class="small muted" style="margin-top:10px">Sample activity counts for demonstration.</p></div></div>`;
+};
+let cf="All";
+const postList=()=>[...S.posts,...POSTS];
+const pvotes=p=>p.votes+(S.votes[p.id]||0);
+P["/community"]=()=>{
+  const list=postList().filter(p=>cf==="All"||p.cat===cf);
+  return `<div class="row between wrap" style="margin-bottom:24px">${head("Community","A Reddit-style demo forum for mortgage professionals.").replace('class="ph"','class="ph" style="margin:0"')}<button class="btn gold" data-act="newpost" data-testid="button-new-post">${ic("plus")} New Post</button></div>
+  <div class="tabs" role="tablist" aria-label="Post categories">${PCATS.map(c=>`<button class="tab" role="tab" aria-selected="${c===cf}" data-act="cfilter" data-v="${c}" data-testid="tab-cat-${slug(c)}">${c}</button>`).join("")}</div>
+  <div class="stack" style="gap:12px">${list.length?list.map(p=>`<div class="card post hover" data-testid="post-${p.id}"><div class="votes"><button data-act="vote" data-id="${p.id}" data-d="1" aria-pressed="${S.votes[p.id]===1}" aria-label="Upvote" data-testid="button-up-${p.id}">${ic("up")}</button><b data-testid="text-votes-${p.id}">${pvotes(p)}</b><button data-act="vote" data-id="${p.id}" data-d="-1" aria-pressed="${S.votes[p.id]===-1}" aria-label="Downvote" data-testid="button-down-${p.id}">${ic("down")}</button></div>
+   <div class="grow"><button data-act="popen" data-id="${p.id}" style="background:none;border:0;padding:0;text-align:left;font-weight:700;font-size:16px" data-testid="link-post-${p.id}">${esc(p.title)}</button>
+   <div class="row wrap small muted" style="margin-top:8px"><div class="avatar sm" style="width:24px;height:24px;font-size:9px">${ini(p.author)}</div><span>${esc(p.author)}</span><span class="badge">${p.cat}</span><span>${p.comments+(S.postReplies[p.id]||[]).length} comments</span><span>${p.time}</span></div></div></div>`).join(""):`<div class="card muted">No posts in this category yet.</div>`}</div>
+  <p class="small muted" style="margin-top:16px">${note("Posts, votes, and replies are stored only in this browser. They are not shared with other people.")}</p>`;
+};
+function postDialog(id){
+  const p=postList().find(x=>x.id===id);if(!p)return;const reps=[...p.replies,...(S.postReplies[id]||[])];
+  openDlg(`<h2 id="dlg-title">${esc(p.title)}</h2><div class="row wrap small muted" style="margin-bottom:12px"><div class="avatar sm">${ini(p.author)}</div><b style="color:var(--fg)">${esc(p.author)}</b><span class="badge">${p.cat}</span><span>${p.time}</span><span>${pvotes(p)} votes</span></div>
+  <p style="white-space:pre-wrap">${esc(p.body)}</p><h3 style="margin:18px 0 4px">Comments (${p.comments+(S.postReplies[id]||[]).length})</h3><p class="small muted">Showing ${reps.length} sample and local replies.</p>
+  ${reps.map(r=>replyHTML(r[0],r[1])).join("")||'<p class="muted">No comments yet.</p>'}
+  <form data-form="post-reply" data-id="${id}" novalidate style="margin-top:12px"><div class="field"><label for="pr">Add a comment</label><textarea id="pr" name="text" data-testid="input-post-reply"></textarea><div class="err" role="alert"></div></div><button class="btn primary" type="submit" data-testid="button-post-reply">Comment</button></form>`);
+}
+function newPostDialog(){
+  openDlg(`<h2 id="dlg-title">New Post</h2><form data-form="new-post" novalidate>
+  <div class="field"><label for="np1">Title</label><input type="text" id="np1" name="title" maxlength="140" data-testid="input-post-title"></div>
+  <div class="field"><label for="np2">Category</label><select id="np2" name="cat" data-testid="select-post-category">${PCATS.slice(1).map(c=>`<option>${c}</option>`).join("")}</select></div>
+  <div class="field"><label for="np3">Body</label><textarea id="np3" name="body" data-testid="input-post-body"></textarea></div>
+  <div class="err" role="alert"></div>${note("This post will be saved only in your browser. No one else will see it.")}
+  <div class="row" style="margin-top:14px;justify-content:flex-end"><button type="button" class="btn" data-act="close">Cancel</button><button class="btn primary" type="submit" data-testid="button-submit-post">Publish locally</button></div></form>`);
+}
+let stab="Scripts",dripSel=null;
+P["/sales-coaching"]=()=>{
+  const tabs=["Scripts","Drip Campaigns","Working with Agents"];let body="";
+  if(stab==="Scripts")body=SCRIPTS.map((s,i)=>`<details class="acc" ${i===0?"open":""} data-testid="accordion-script-${i}"><summary>${i+1}. ${s.t}</summary><div class="body"><div class="script">${esc(s.b)}</div><button class="btn sm" data-act="copy" data-i="${i}" data-testid="button-copy-${i}">${ic("copy")} Copy Script</button></div></details>`).join("")+note("Scripts are examples to adapt. Approvals, costs, credit impact, float-down eligibility, and closing dates depend on lender policy and the borrower’s situation. Never promise approvals or future rates.");
+  if(stab==="Drip Campaigns")body=`<div class="card"><div class="tbl-wrap"><table><caption class="sr">Drip campaigns</caption><thead><tr><th>Campaign</th><th>Audience</th><th class="num">Emails</th><th>Status</th><th></th></tr></thead><tbody>${DRIPS.map((d,i)=>`<tr><td><b>${d[0]}</b></td><td>${d[1]}</td><td class="num">${d[2]}</td><td><span class="badge ${d[3]==="Active"?"ok":d[3]==="Paused"?"warn":"draft"}">${d[3]}</span></td><td class="num"><button class="btn sm" data-act="drip" data-i="${i}" data-testid="button-view-sequence-${i}">View sequence</button></td></tr>`).join("")}</tbody></table></div></div>
+  ${dripSel!==null?`<div class="card" style="margin-top:18px" data-testid="panel-sequence"><h2>${DRIPS[dripSel][0]}: sample sequence</h2>${DRIP_SEQ[DRIPS[dripSel][0]].map((s,i)=>`<div class="row" style="padding:10px 0;border-top:${i?"1px solid var(--border)":"0"}">${ic("mail")}<span class="badge">${s[0]}</span><span>${s[1]}</span></div>`).join("")}<p class="small muted" style="margin-top:8px">Showing sample subject lines. ${DRIPS[dripSel][2]} emails in the full series.</p></div>`:""}
+  <div style="margin-top:14px">${note("Demo only. No emails are sent and no automations run.")}</div>`;
+  if(stab==="Working with Agents")body=`<div class="grid g2">${AGENTS.map((a,i)=>{const sv=S.saved.includes(i);return `<div class="card"><h3>${a[0]}</h3><p class="muted" style="margin:8px 0 14px">${a[1]}</p><button class="btn sm ${sv?"saved":""}" data-act="saveplay" data-i="${i}" aria-pressed="${sv}" data-testid="button-save-playbook-${i}">${ic(sv?"check":"bookmark")} ${sv?"Saved to Playbook":"Save to Playbook"}</button></div>`}).join("")}</div>
+  <div style="margin-top:14px">${note("Co-marketing, gifts, sponsorships, and cost-sharing require lender approval and must follow RESPA, licensing rules, and company policy. Paying for referrals is not acceptable.")}</div>`;
+  return head("Sales Coaching","Scripts, drip campaign blueprints, and strategies for building agent partnerships.")+`<div class="tabs" role="tablist" aria-label="Sales coaching sections">${tabs.map(t=>`<button class="tab" role="tab" aria-selected="${t===stab}" data-act="stab" data-v="${t}" data-testid="tab-sales-${slug(t)}">${t}</button>`).join("")}</div>`+body;
+};
+let cal={y:0,m:0,init:false},selDay=null;
+const availDay=d=>{const t=today(),dow=d.getDay();return d>t&&d<=addDays(t,75)&&dow>=1&&dow<=4};
+const taken=(k,t)=>S.bookings.some(b=>b.key===k&&b.time===t);
+function nextSample(){let d=addDays(today(),3);while(d.getDay()!==2)d=addDays(d,1);return d}
+P["/coach-lee"]=()=>{
+  if(!cal.init){const t=today();cal={y:t.getFullYear(),m:t.getMonth(),init:true}}
+  const first=new Date(cal.y,cal.m,1),off=(first.getDay()+6)%7,dim=new Date(cal.y,cal.m+1,0).getDate();
+  let cells="";for(let i=0;i<off;i++)cells+="<span></span>";
+  for(let d=1;d<=dim;d++){const dt=new Date(cal.y,cal.m,d),k=dkey(dt),av=availDay(dt);cells+=`<button ${av?`data-act="day" data-k="${k}"`:"disabled"} class="${av?"av":""} ${selDay===k?"sel":""}" aria-label="${dstr(dt)}${av?", available":", unavailable"}" ${selDay===k?'aria-pressed="true"':""} data-testid="day-${k}">${d}</button>`}
+  const sd=selDay?new Date(selDay+"T00:00:00"):null;
+  const next=S.bookings.slice().sort((a,b)=>a.key.localeCompare(b.key))[0];
+  const nd=next?new Date(next.key+"T00:00:00"):nextSample();
+  const notes=[[14,"Pipeline Review","Reviewed stalled files and agreed on a three-call daily block. Action: re-contact pre-approved buyers this week."],[28,"Agent Relationships","Mapped top ten agent targets and drafted a Tuesday update call outline."],[42,"Business Plan Review","Set quarterly loan targets and a weekly activity scorecard."]];
+  return `<h1 class="sr">Coach with Lee</h1><div class="hero"><div class="avatar" aria-hidden="true">LT</div><div class="grow" style="min-width:240px"><h2>Lee Thompson</h2><p style="color:#cbd5e1;max-width:620px">Mortgage coach with about twelve years of experience coaching loan officers. Lee helps originators build consistent prospecting habits, strong Realtor relationships, and clear sales conversations, with accountability that sticks.</p>
+  <div class="row wrap" style="margin-top:12px">${["Prospecting","Realtor relationships","Sales conversations","Accountability","Business planning"].map(s=>`<span class="badge">${s}</span>`).join("")}</div></div></div>
+  <div class="grid g21" style="margin-top:18px">
+   <div class="card"><h2>Schedule a 1:1 Session</h2><div class="grid g2" style="gap:24px">
+    <div><div class="row between" style="margin-bottom:10px"><button class="btn sm" data-act="calprev" aria-label="Previous month" data-testid="button-cal-prev">${ic("left")}</button><b>${first.toLocaleDateString("en-US",{month:"long",year:"numeric"})}</b><button class="btn sm" data-act="calnext" aria-label="Next month" data-testid="button-cal-next">${ic("right")}</button></div>
+     <div class="cal">${["M","T","W","T","F","S","S"].map(d=>`<span class="dh" aria-hidden="true">${d}</span>`).join("")}${cells}</div><p class="small muted" style="margin-top:8px">Sample availability: Monday to Thursday.</p></div>
+    <div><h3 style="margin-bottom:4px">${sd?dstr(sd):"Select a date"}</h3><p class="small muted" style="margin-bottom:12px">Times shown in Eastern Time (ET)</p>
+     ${sd?`<div class="slots">${SLOTS.map(t=>taken(selDay,t)?`<button class="slot" disabled style="opacity:.45">${t} (booked)</button>`:`<button class="slot" data-act="slot" data-t="${t}" data-testid="slot-${slug(t)}">${t}</button>`).join("")}</div>`:`<p class="muted">Choose an available date to see time slots.</p>`}</div></div>
+    <div style="margin-top:14px">${note("Booking is a browser-only simulation. No real appointment or meeting link is created.")}</div></div>
+   <div class="stack"><div class="card"><h2>Next Appointment</h2><div class="badge ${next?"ok":""}" style="margin-bottom:8px">${next?"Your demo booking":"Sample appointment"}</div>
+    <p><b>${dstr(nd)}</b></p><p class="muted">${next?next.time:"10:30 AM"} ET | ${next?next.topic:"Pipeline Review"}</p>
+    <div class="row wrap" style="margin-top:12px"><button class="btn primary sm" data-act="join" data-testid="button-join-session">Join session</button>${next?`<button class="btn sm" data-act="cancelbook" data-id="${next.id}" data-testid="button-cancel-booking">Cancel demo booking</button>`:""}</div></div>
+    ${S.bookings.length>1?`<div class="card"><h3 style="margin-bottom:8px">Other demo bookings</h3>${S.bookings.filter(b=>b!==next).map(b=>`<p class="small">${dstr(new Date(b.key+"T00:00:00"),{month:"short",day:"numeric"})}, ${b.time} ET: ${b.topic}</p>`).join("")}</div>`:""}
+    <div class="card"><h2>Past Session Notes</h2>${notes.map((n,i)=>`<div style="padding:10px 0;border-top:${i?"1px solid var(--border)":"0"}"><div class="row between"><b>${n[1]}</b><span class="small muted">${dstr(addDays(today(),-n[0]),{month:"short",day:"numeric",year:"numeric"})}</span></div><p class="small muted">${n[2]}</p></div>`).join("")}<p class="small muted">Sample notes.</p></div></div></div>`;
+};
+function bookDialog(t){
+  const sd=new Date(selDay+"T00:00:00");
+  openDlg(`<h2 id="dlg-title">Book Session with Lee</h2><p style="margin-bottom:14px"><b>${dstr(sd)}</b> at <b>${t}</b> ET</p><form data-form="book" data-t="${t}" novalidate>
+  <div class="field"><label for="bt">Topic</label><select id="bt" name="topic" data-testid="select-topic">${TOPICS.map(x=>`<option>${x}</option>`).join("")}</select></div>
+  <div class="field"><label for="bn">Notes for Lee (optional)</label><textarea id="bn" name="notes" data-testid="input-session-notes"></textarea></div>${note("Demo only. Confirming saves a simulated booking in this browser. No meeting is scheduled and nobody is notified.")}
+  <div class="row" style="margin-top:14px;justify-content:flex-end"><button type="button" class="btn" data-act="close">Cancel</button><button class="btn gold" type="submit" data-testid="button-confirm-booking">Confirm demo booking</button></div></form>`);
+}
+let rq="";
+const resItems=()=>{const q=rq.trim().toLowerCase();const items=RESOURCES.map((r,i)=>({r,i})).filter(({r})=>!q||(r[0]+" "+r[1]+" "+r[2]).toLowerCase().includes(q));
+  const out=RCATS.map(c=>{const g=items.filter(x=>x.r[1]===c);return g.length?`<h2 style="font-size:18px;margin:20px 0 12px">${c}</h2><div class="grid g2">${g.map(({r,i})=>`<div class="card res hover"><div class="ri">${ic(r[3])}</div><div class="grow"><h3>${r[0]}</h3><p class="small muted">${r[2]}</p></div><button class="btn sm" data-act="resdl" data-i="${i}" aria-label="Download sample text file for ${r[0]}" data-testid="button-download-${i}">${ic("download")} Sample</button></div>`).join("")}</div>`:""}).join("");
+  return out||`<div class="card muted" style="margin-top:16px">No resources match your search.</div>`};
+P["/resources"]=()=>head("Resources Hub","Reference tools and learning materials. Downloads are simple sample text files, not real PDFs or workbooks.")+
+  `<div class="ratestrip"><div class="r"><b>6.875%</b><span>30-Year Fixed</span></div><div class="r"><b>6.125%</b><span>15-Year Fixed</span></div><div class="r"><b>5.750%</b><span>5/1 ARM</span></div><span class="tag">Sample Rates - Demo Only</span></div>
+  <p class="small muted" style="margin:-10px 0 16px">Illustrative figures only. Not a live rate feed, offer, or APR quote.</p>
+  <div class="field" style="max-width:420px"><label for="rs">Search resources</label><input type="search" id="rs" value="${esc(rq)}" data-input="res" placeholder="Search by name or topic" data-testid="input-resource-search"></div><div id="res-list">${resItems()}</div>`;
+P["404"]=()=>head("Page not found","That page does not exist.")+`<div class="card"><p style="margin-bottom:14px">Try one of the sections in the sidebar, or head back to your dashboard.</p><a class="btn primary" href="#/" data-testid="link-home">Go to Dashboard</a></div>`;
+
+/* ---------- router ---------- */
+function route(){
+  if(dlg.open)dlg.close();
+  const h=location.hash.replace(/^#/,"")||"/";const path=h.startsWith("/")?h:"/";
+  const key=P[path]&&path!=="404"?path:"404";
+  $("#nav").innerHTML=NAV.map(n=>`<a href="#${n[0]}" ${n[0]===key?'aria-current="page"':""} data-testid="link-nav-${slug(n[1])}">${ic(n[2])}<span>${n[1]}</span></a>`).join("");
+  const label=(NAV.find(n=>n[0]===key)||["","Not Found"])[1];document.title=label+" | LO Academy";
+  render(key);document.body.classList.remove("menu-open");
+}
+function render(key){
+  key=key||(P[location.hash.replace(/^#/,"")]?location.hash.replace(/^#/,""):"/");
+  const v=$("#view");
+  try{v.innerHTML=`<div class="page">${P[key]()}</div>`}
+  catch(e){console.error(e);v.innerHTML=`<div class="page"><div class="card"><h2>Something went wrong</h2><p class="muted" style="margin-bottom:12px">This page failed to render.</p><button class="btn primary" onclick="location.reload()">Reload</button></div></div>`}
+}
+function rerender(){const y=scrollY;const p=location.hash.replace(/^#/,"")||"/";render(P[p]?p:"404");scrollTo(0,y)}
+window.addEventListener("hashchange",()=>{route();scrollTo(0,0)});
+
+/* ---------- theme ---------- */
+function setTheme(t){document.documentElement.dataset.theme=t;$('[data-act=theme]').innerHTML=ic(t==="dark"?"sun":"moon");S.theme=t;save()}
+$('[data-act=menu]').innerHTML=ic("menu");$('[data-act=bell]').innerHTML=ic("bell")+'<span class="dot" aria-hidden="true"></span>';
+setTheme(S.theme||(matchMedia("(prefers-color-scheme: dark)").matches?"dark":"light"));
+
+/* ---------- events ---------- */
+document.addEventListener("click",e=>{
+  const el=e.target.closest("[data-act]");if(!el)return;const a=el.dataset.act,d=el.dataset;
+  switch(a){
+  case"menu":document.body.classList.add("menu-open");break;
+  case"menu-close":document.body.classList.remove("menu-open");break;
+  case"theme":setTheme(document.documentElement.dataset.theme==="dark"?"light":"dark");break;
+  case"bell":toast("Demo only: there are no real notifications.");break;
+  case"close":dlg.close();break;
+  case"vfilter":vf=d.v;rerender();break;
+  case"vopen":videoDialog(+d.id);break;
+  case"cfilter":cf=d.v;rerender();break;
+  case"popen":postDialog(d.id);break;
+  case"newpost":newPostDialog();break;
+  case"vote":{const dir=+d.d;S.votes[d.id]=S.votes[d.id]===dir?0:dir;save();rerender();if(dlg.open)dlg.close();break}
+  case"stab":stab=d.v;rerender();break;
+  case"drip":dripSel=+d.i;rerender();setTimeout(()=>{const p=$('[data-testid=panel-sequence]');p&&p.scrollIntoView({block:"nearest"})},0);break;
+  case"saveplay":{const i=+d.i;S.saved=S.saved.includes(i)?S.saved.filter(x=>x!==i):[...S.saved,i];save();rerender();break}
+  case"copy":{const txt=SCRIPTS[+d.i].b;
+    (navigator.clipboard&&navigator.clipboard.writeText?navigator.clipboard.writeText(txt):Promise.reject()).then(()=>toast("Script copied to clipboard."),()=>{
+      const ta=document.createElement("textarea");ta.value=txt;document.body.appendChild(ta);ta.select();let ok=false;try{ok=document.execCommand("copy")}catch(_){}ta.remove();
+      toast(ok?"Script copied to clipboard.":"Copy was blocked by the browser. Select the text and copy it manually.")});break}
+  case"check":{S.checks[+d.i]=el.checked?1:0;save();rerender();break}
+  case"book-progress":S.progress=Math.min(100,S.progress+5);save();rerender();break;
+  case"goto-notes":e.preventDefault();$("#nt").scrollIntoView({behavior:"smooth",block:"center"});$("#nt").focus();break;
+  case"calprev":{const t=today();if(cal.y===t.getFullYear()&&cal.m===t.getMonth())break;cal.m--;if(cal.m<0){cal.m=11;cal.y--}rerender();break}
+  case"calnext":cal.m++;if(cal.m>11){cal.m=0;cal.y++}rerender();break;
+  case"day":selDay=d.k;rerender();break;
+  case"slot":bookDialog(d.t);break;
+  case"join":openDlg(`<h2 id="dlg-title">Demo session</h2><p>This is a demo, so there is no real meeting link. In a production product, this button would open your video call with Lee.</p><div class="row" style="margin-top:16px;justify-content:flex-end"><button class="btn primary" data-act="close">Got it</button></div>`);break;
+  case"cancelbook":S.bookings=S.bookings.filter(b=>b.id!==d.id);save();rerender();toast("Demo booking removed.");break;
+  case"resdl":{const r=RESOURCES[+d.i],txt=`LO Academy sample resource\n\n${r[0]}\nCategory: ${r[1]}\n${r[2]}\n\nThis is a placeholder text file generated in your browser. It is not a real PDF, workbook, or lender document. Rates and numbers in LO Academy are illustrative only.\n`;
+    const url=URL.createObjectURL(new Blob([txt],{type:"text/plain"})),l=document.createElement("a");l.href=url;l.download=slug(r[0])+"-sample.txt";document.body.appendChild(l);l.click();l.remove();setTimeout(()=>URL.revokeObjectURL(url),500);toast("Sample text file downloaded.");break}
+  }
+});
+document.addEventListener("input",e=>{
+  const t=e.target;
+  if(t.dataset.input==="notes"){S.notes=t.value;save()}
+  if(t.dataset.input==="res"){rq=t.value;$("#res-list").innerHTML=resItems()}
+});
+document.addEventListener("submit",e=>{
+  const f=e.target.closest("form[data-form]");if(!f)return;e.preventDefault();
+  const kind=f.dataset.form,fd=new FormData(f),err=$(".err",f),fail=m=>{if(err)err.textContent=m};
+  if(kind==="book-reply"){const t=(fd.get("text")||"").trim();if(!t)return fail("Please write a reply first.");S.bookReplies.push(["Alex Rivera",t]);save();rerender()}
+  if(kind==="post-reply"){const t=(fd.get("text")||"").trim();if(!t)return fail("Please write a comment first.");const id=f.dataset.id;(S.postReplies[id]=S.postReplies[id]||[]).push(["Alex Rivera",t]);save();postDialog(id);rerender()}
+  if(kind==="new-post"){const title=(fd.get("title")||"").trim(),body=(fd.get("body")||"").trim();if(!title)return fail("A title is required.");if(!body)return fail("Please add some body text.");
+    S.posts.unshift({id:"u"+Date.now(),title,author:"Alex Rivera",cat:fd.get("cat"),votes:0,comments:0,time:"Just now",body,replies:[]});save();dlg.close();cf="All";rerender();toast("Post added to this browser.")}
+  if(kind==="goals"){const g={loans:Number(fd.get("loans")),avg:Number(fd.get("avg")),rev:Number(fd.get("rev"))};
+    if(![g.loans,g.avg,g.rev].every(v=>isFinite(v)&&v>0))return $("#goal-err").textContent="Enter a number greater than zero in every field.";
+    S.goals=g;save();rerender();const b=$('[data-testid=button-save-goals]');if(b){b.classList.add("saved");b.innerHTML=ic("check")+(persisted?" Saved in this browser":" Saved for this session only")}}
+  if(kind==="book"){const b={id:"b"+Date.now(),key:selDay,time:f.dataset.t,topic:fd.get("topic"),notes:(fd.get("notes")||"").trim()};
+    if(taken(b.key,b.time))return fail("That slot was just taken.");S.bookings.push(b);save();
+    $("#dlg-body").innerHTML=`<button class="x" data-act="close" aria-label="Close dialog">${ic("x")}</button><h2 id="dlg-title">Demo booking confirmed</h2><p><b>${dstr(new Date(b.key+"T00:00:00"))}</b> at <b>${b.time}</b> ET<br>${b.topic}</p><div style="margin:14px 0">${note("This is a simulation saved in your browser. No real appointment or meeting link was created and Lee has not been notified.")}</div><div style="text-align:right"><button class="btn primary" data-act="close" data-testid="button-done-booking">Done</button></div>`;rerender()}
+});
+document.addEventListener("keydown",e=>{if(e.key==="Escape")document.body.classList.remove("menu-open")});
+window.addEventListener("error",()=>{const v=$("#view");if(v&&!v.innerHTML.trim())v.innerHTML='<div class="page"><div class="card"><h2>Something went wrong</h2><button class="btn primary" onclick="location.reload()">Reload</button></div></div>'});
+route();
+</script>
+</body>
+</html>

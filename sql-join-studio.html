@@ -1,0 +1,2046 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>SQL Join Studio</title>
+<meta name="claude:viewport-fit-sides" content="cover">
+<meta name="description" content="Hands-on SQL training: connect primary and foreign keys in real-world app databases, set one-to-one and one-to-many cardinality, then solve INNER, LEFT, RIGHT and FULL OUTER join questions.">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500;600&family=IBM+Plex+Sans+Condensed:wght@600;700&family=IBM+Plex+Sans:wght@400;500;600;700&display=swap">
+<style>
+/* Layout: a dotted modeling canvas like an ER designer. Landing scrolls; the studio is one fixed screen with a top bar, a status bar and right-side drawers. */
+:root{
+  --bg:#eef1f4; --surface:#ffffff; --surface-2:#f6f8fa; --surface-3:#e9edf1;
+  --ink:#15202b; --ink-2:#4a5a6a; --ink-3:#7a8794; --line:#d9dfe6; --line-2:#c4ccd6;
+  --dot:#c0c8d2; --dot-2:#a3adb9;
+  --accent:#2c56d6; --accent-ink:#ffffff; --accent-soft:#e2e9fb;
+  --pk:#a86f05; --pk-soft:#fbefd4; --fk:#0d7685; --fk-soft:#d9f0f2; --uq:#7444bd; --uq-soft:#eee6fa;
+  --ok:#1b8448; --ok-soft:#dcf2e5; --bad:#c9372c; --bad-soft:#fbe2df;
+  --left:#2c56d6; --left-soft:#e2e9fb; --right:#c05e0c; --right-soft:#fbe8d8;
+  --h1:#2c6fd6; --h2:#cc7419; --h3:#1f8c80; --h4:#8a4dcc; --h5:#c24564; --h6:#5b8619; --h7:#5c6a80;
+  --shadow-1:0 1px 2px rgba(21,32,43,.07),0 2px 8px rgba(21,32,43,.06);
+  --shadow-2:0 14px 40px rgba(21,32,43,.16),0 2px 8px rgba(21,32,43,.08);
+  --scrim:rgba(13,20,28,.45);
+  --f-display:"IBM Plex Sans Condensed","Roboto Condensed","Arial Narrow",system-ui,sans-serif;
+  --f-body:"IBM Plex Sans",system-ui,-apple-system,"Segoe UI",Roboto,Helvetica,Arial,sans-serif;
+  --f-mono:"IBM Plex Mono",ui-monospace,SFMono-Regular,Menlo,Consolas,monospace;
+  --labw:min(620px,100vw);
+  --top:56px; --bot:52px;
+}
+@media (prefers-color-scheme: dark){:root:not([data-theme="light"]){
+  --bg:#0d1218; --surface:#151c24; --surface-2:#1a222c; --surface-3:#222c37;
+  --ink:#e5ebf1; --ink-2:#a7b3c0; --ink-3:#778592; --line:#29333e; --line-2:#38444f;
+  --dot:#29333e; --dot-2:#3b4755;
+  --accent:#7d99ff; --accent-ink:#0d1218; --accent-soft:#1e2948;
+  --pk:#e4b14c; --pk-soft:#382b10; --fk:#4fc4d1; --fk-soft:#11343a; --uq:#b693f0; --uq-soft:#2c2342;
+  --ok:#47c27c; --ok-soft:#133222; --bad:#ff7366; --bad-soft:#3d1a17;
+  --left:#7d99ff; --left-soft:#1e2948; --right:#f19a4f; --right-soft:#3a2614;
+  --h1:#6d9cf0; --h2:#ea9a46; --h3:#4cc0b2; --h4:#b48bf0; --h5:#ec7792; --h6:#93c255; --h7:#94a1b6;
+  --shadow-1:0 1px 2px rgba(0,0,0,.45),0 2px 8px rgba(0,0,0,.25);
+  --shadow-2:0 16px 44px rgba(0,0,0,.55),0 2px 8px rgba(0,0,0,.35);
+  --scrim:rgba(0,0,0,.55);
+  color-scheme:dark;
+}}
+:root[data-theme="dark"]{
+  --bg:#0d1218; --surface:#151c24; --surface-2:#1a222c; --surface-3:#222c37;
+  --ink:#e5ebf1; --ink-2:#a7b3c0; --ink-3:#778592; --line:#29333e; --line-2:#38444f;
+  --dot:#29333e; --dot-2:#3b4755;
+  --accent:#7d99ff; --accent-ink:#0d1218; --accent-soft:#1e2948;
+  --pk:#e4b14c; --pk-soft:#382b10; --fk:#4fc4d1; --fk-soft:#11343a; --uq:#b693f0; --uq-soft:#2c2342;
+  --ok:#47c27c; --ok-soft:#133222; --bad:#ff7366; --bad-soft:#3d1a17;
+  --left:#7d99ff; --left-soft:#1e2948; --right:#f19a4f; --right-soft:#3a2614;
+  --h1:#6d9cf0; --h2:#ea9a46; --h3:#4cc0b2; --h4:#b48bf0; --h5:#ec7792; --h6:#93c255; --h7:#94a1b6;
+  --shadow-1:0 1px 2px rgba(0,0,0,.45),0 2px 8px rgba(0,0,0,.25);
+  --shadow-2:0 16px 44px rgba(0,0,0,.55),0 2px 8px rgba(0,0,0,.35);
+  --scrim:rgba(0,0,0,.55);
+  color-scheme:dark;
+}
+*{box-sizing:border-box}
+html,body{height:100%}
+body{margin:0;background:var(--bg);color:var(--ink);font-family:var(--f-body);font-size:14px;line-height:1.5;-webkit-font-smoothing:antialiased;text-rendering:optimizeLegibility}
+h1,h2,h3,h4,p,ul,ol{margin:0}
+ul,ol{padding:0;list-style:none}
+button,input,select{font:inherit;color:inherit}
+button{cursor:pointer;background:none;border:0;padding:0}
+code,kbd,.mono{font-family:var(--f-mono)}
+:focus-visible{outline:2px solid var(--accent);outline-offset:2px}
+[hidden]{display:none!important}
+.ic{width:18px;height:18px;flex:none;display:inline-block;vertical-align:middle}
+.sr{position:absolute;width:1px;height:1px;overflow:hidden;clip:rect(0 0 0 0);white-space:nowrap}
+.dotted{background-color:var(--bg);background-image:radial-gradient(circle,var(--dot) 1.1px,transparent 1.6px);background-size:24px 24px}
+
+/* buttons */
+.btn{display:inline-flex;align-items:center;justify-content:center;gap:8px;height:38px;padding:0 16px;border-radius:9px;font-weight:600;font-size:14px;border:1px solid var(--line-2);background:var(--surface);color:var(--ink);transition:background .15s,border-color .15s,transform .1s,box-shadow .15s;white-space:nowrap}
+.btn:hover{background:var(--surface-2);border-color:var(--ink-3)}
+.btn:active{transform:translateY(1px)}
+.btn.primary{background:var(--accent);border-color:var(--accent);color:var(--accent-ink)}
+.btn.primary:hover{filter:brightness(1.08)}
+.btn.danger{color:var(--bad);border-color:color-mix(in srgb,var(--bad) 40%,var(--line))}
+.btn.danger:hover{background:var(--bad-soft)}
+.btn.ghost{border-color:transparent;background:transparent}
+.btn.ghost:hover{background:var(--surface-3)}
+.btn.sm{height:32px;padding:0 12px;font-size:13px;border-radius:8px}
+.btn[disabled]{opacity:.45;cursor:not-allowed;transform:none;filter:none}
+.ibtn{width:36px;height:36px;border-radius:9px;display:inline-grid;place-items:center;color:var(--ink-2);transition:background .15s,color .15s}
+.ibtn:hover{background:var(--surface-3);color:var(--ink)}
+.ibtn[aria-pressed="true"]{background:var(--accent-soft);color:var(--accent)}
+
+/* brand */
+.brand{display:flex;align-items:center;gap:10px;font-weight:700;letter-spacing:-.1px}
+.mark{width:32px;height:32px;border-radius:8px;background:var(--ink);color:var(--bg);display:grid;place-items:center;font-size:19px;line-height:1;font-family:var(--f-mono);font-weight:600;flex:none}
+.brand b{font-family:var(--f-display);font-size:19px;font-weight:700;letter-spacing:.1px}
+
+/* ============ HOME ============ */
+#home{min-height:100%;padding-left:max(16px,env(safe-area-inset-left,0px));padding-right:max(16px,env(safe-area-inset-right,0px))}
+.wrap{max-width:1180px;margin:0 auto}
+.home-top{display:flex;align-items:center;justify-content:space-between;gap:12px;padding-block:18px}
+.home-top nav{display:flex;align-items:center;gap:4px}
+.hero{display:grid;grid-template-columns:minmax(0,1.05fr) minmax(0,.95fr);gap:40px;align-items:center;padding-block:28px 40px}
+.eyebrow{font-family:var(--f-mono);font-size:12px;letter-spacing:.08em;text-transform:uppercase;color:var(--ink-2);display:flex;align-items:center;gap:8px}
+.eyebrow::before{content:"";width:18px;height:2px;background:var(--accent);border-radius:2px}
+.hero h1{font-family:var(--f-display);font-weight:700;font-size:clamp(36px,5.2vw,60px);line-height:1.02;letter-spacing:-.8px;margin-top:14px;text-wrap:balance}
+.hero h1 em{font-style:normal;color:var(--accent)}
+.hero .lede{font-size:16.5px;color:var(--ink-2);margin-top:16px;max-width:58ch}
+.namebox{margin-top:24px;display:flex;flex-direction:column;gap:6px;max-width:440px}
+.namebox label{font-weight:600;font-size:13px}
+.field{height:46px;border-radius:10px;border:1px solid var(--line-2);background:var(--surface);padding:0 14px;font-size:16px;width:100%;transition:border-color .15s,box-shadow .15s}
+.field:focus{outline:none;border-color:var(--accent);box-shadow:0 0 0 3px var(--accent-soft)}
+.field.err{border-color:var(--bad);box-shadow:0 0 0 3px var(--bad-soft)}
+.namebox .help{font-size:12.5px;color:var(--ink-3)}
+.namebox .help.err{color:var(--bad);font-weight:600}
+.steps{display:flex;flex-wrap:wrap;gap:8px 18px;margin-top:22px}
+.steps li{display:flex;align-items:center;gap:8px;font-size:13px;color:var(--ink-2)}
+.steps li b{width:22px;height:22px;border-radius:50%;border:1.5px solid var(--line-2);display:grid;place-items:center;font-family:var(--f-mono);font-size:11px;color:var(--ink);background:var(--surface)}
+.demo{position:relative;border-radius:16px;border:1px solid var(--line);background-color:var(--bg);background-image:radial-gradient(circle,var(--dot) 1.1px,transparent 1.6px);background-size:22px 22px;box-shadow:var(--shadow-1);overflow:hidden}
+.demo svg{display:block;width:100%;height:auto}
+.demo .cap{position:absolute;left:14px;bottom:12px;font-size:12px;color:var(--ink-2);background:var(--surface);border:1px solid var(--line);border-radius:999px;padding:3px 10px}
+.demo text{font-family:var(--f-mono)}
+.sec{padding-block:26px}
+.sec-h{display:flex;align-items:end;justify-content:space-between;gap:16px;flex-wrap:wrap;margin-bottom:16px}
+.sec-h h2{font-family:var(--f-display);font-size:28px;font-weight:700;letter-spacing:-.3px}
+.sec-h p{color:var(--ink-2);max-width:62ch}
+.dbgrid{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:16px}
+.db{position:relative;text-align:left;display:flex;flex-direction:column;gap:10px;padding:18px;border-radius:14px;background:var(--surface);border:1px solid var(--line);box-shadow:var(--shadow-1);transition:transform .15s,box-shadow .15s,border-color .15s;min-width:0}
+.db:hover{transform:translateY(-3px);box-shadow:var(--shadow-2);border-color:var(--line-2)}
+.db-head{display:flex;align-items:center;gap:12px}
+.db-ic{width:42px;height:42px;border-radius:11px;display:grid;place-items:center;background:var(--c);color:#fff;flex:none}
+.db-ic svg{width:24px;height:24px}
+.db-name{font-family:var(--f-display);font-size:21px;font-weight:700;line-height:1.1;display:block}
+.db-dom{font-size:12.5px;color:var(--ink-2);display:block}
+.db-blurb{font-size:13px;color:var(--ink-2)}
+.db-tables{display:flex;flex-wrap:wrap;gap:4px}
+.db-tables code{font-size:11px;padding:2px 6px;border-radius:5px;background:var(--surface-2);border:1px solid var(--line);color:var(--ink-2)}
+.db-meta{font-family:var(--f-mono);font-size:11.5px;color:var(--ink-3);margin-top:auto;display:flex;flex-wrap:wrap;gap:2px 10px}
+.db-meta span{white-space:nowrap}
+.db-foot{display:flex;align-items:center;justify-content:space-between;gap:8px;border-top:1px solid var(--line);padding-top:10px}
+.db-state{font-size:12.5px;font-weight:600;color:var(--ink-2)}
+.db-state.done{color:var(--ok)}
+.db-go{font-size:13px;font-weight:600;color:var(--accent);display:flex;align-items:center;gap:4px}
+.db-bar{height:4px;border-radius:4px;background:var(--surface-3);overflow:hidden}
+.db-bar i{display:block;height:100%;background:var(--accent);border-radius:4px}
+.db.primer{background:transparent;border-style:dashed;box-shadow:none;justify-content:center}
+.db.primer:hover{background:var(--surface)}
+.primer-ic{width:42px;height:42px;border-radius:11px;display:grid;place-items:center;border:1px solid var(--line-2);color:var(--ink-2)}
+.joingrid{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:16px}
+.jcard{background:var(--surface);border:1px solid var(--line);border-radius:14px;padding:16px;display:flex;flex-direction:column;gap:8px;min-width:0}
+.jcard h3{font-family:var(--f-mono);font-size:14px;font-weight:600}
+.jcard p{font-size:13px;color:var(--ink-2)}
+.jcard svg{width:132px;height:auto}
+.home-foot{display:flex;flex-wrap:wrap;gap:10px 24px;justify-content:space-between;align-items:center;border-top:1px solid var(--line);padding-block:20px 32px;margin-top:20px;color:var(--ink-3);font-size:12.5px}
+.home-foot .lnk{color:var(--ink-2);font-weight:600;text-decoration:underline;text-underline-offset:3px}
+@media (max-width:1060px){.dbgrid,.joingrid{grid-template-columns:repeat(2,minmax(0,1fr))}.hero{grid-template-columns:1fr;gap:28px}}
+@media (max-width:560px){.dbgrid,.joingrid{grid-template-columns:1fr}.hero{padding-block:12px 24px}}
+
+/* ============ STUDIO ============ */
+#studio{position:fixed;inset:0;display:flex;flex-direction:column;background:var(--bg);overflow:hidden}
+body.in-studio{overflow:hidden}
+.topbar{flex:none;height:calc(var(--top) + env(safe-area-inset-top,0px));padding-top:env(safe-area-inset-top,0px);padding-left:max(12px,env(safe-area-inset-left,0px));padding-right:max(12px,env(safe-area-inset-right,0px));display:flex;align-items:center;gap:10px;background:var(--surface);border-bottom:1px solid var(--line);position:relative;z-index:30}
+.tb-db{display:flex;align-items:center;gap:10px;min-width:0}
+.tb-db .db-ic{width:30px;height:30px;border-radius:8px}
+.tb-db .db-ic svg{width:18px;height:18px}
+.tb-db b{font-family:var(--f-display);font-size:18px;white-space:nowrap}
+.tb-db span{color:var(--ink-3);font-size:13px;white-space:nowrap}
+.tb-sep{width:1px;height:24px;background:var(--line)}
+.phases{display:flex;align-items:center;gap:4px;margin:0 auto;background:var(--surface-2);border:1px solid var(--line);border-radius:10px;padding:3px}
+.phase{display:flex;align-items:center;gap:8px;height:32px;padding:0 12px;border-radius:7px;font-weight:600;font-size:13px;color:var(--ink-2)}
+.phase .n{width:20px;height:20px;border-radius:50%;display:grid;place-items:center;font-family:var(--f-mono);font-size:11px;border:1.5px solid currentColor}
+.phase[aria-current="step"]{background:var(--surface);color:var(--ink);box-shadow:var(--shadow-1)}
+.phase.done .n{background:var(--ok);border-color:var(--ok);color:#fff}
+.phase[disabled]{opacity:.55;cursor:not-allowed}
+.phase .t-short,.lbl-s{display:none}
+.phase{white-space:nowrap}
+.tb-tools{display:flex;align-items:center;gap:2px}
+.tb-tools .btn{height:34px}
+.hint-btn .hk{font-family:var(--f-mono);font-size:11px;color:var(--ink-3)}
+
+#vp{position:absolute;top:calc(var(--top) + env(safe-area-inset-top,0px));bottom:calc(var(--bot) + env(safe-area-inset-bottom,0px));left:0;right:0;overflow:hidden;touch-action:none;cursor:grab;background-color:var(--bg);background-image:radial-gradient(circle,var(--dot) 1.1px,transparent 1.6px),radial-gradient(circle,var(--dot-2) 1.7px,transparent 2.2px);transition:right .28s ease}
+#vp.panning{cursor:grabbing}
+#vp.linking{cursor:crosshair}
+body.lab-open #vp{right:var(--labw)}
+#world{position:absolute;left:0;top:0;transform-origin:0 0;will-change:transform}
+#links{position:absolute;left:-6000px;top:-6000px;width:12000px;height:12000px;overflow:visible;pointer-events:none}
+.lk .hit{fill:none;stroke:transparent;stroke-width:16;pointer-events:stroke;cursor:pointer}
+.lk .ln{fill:none;stroke-width:2.2;transition:stroke-width .12s}
+.lk.ok .ln{stroke:var(--ok)}
+.lk.bad .ln{stroke:var(--bad);stroke-dasharray:7 5}
+.lk:hover .ln,.lk.sel .ln{stroke-width:3.4}
+.lk .chip circle{fill:var(--surface);stroke-width:1.6}
+.lk.ok .chip circle{stroke:var(--ok)}
+.lk.bad .chip circle{stroke:var(--bad)}
+.lk .chip text{font-family:var(--f-mono);font-size:12px;font-weight:600;fill:var(--ink);text-anchor:middle;dominant-baseline:central}
+.lk .st circle{stroke:none}
+.lk.ok .st circle{fill:var(--ok)}
+.lk.bad .st circle{fill:var(--bad)}
+.lk .st path{fill:none;stroke:#fff;stroke-width:2;stroke-linecap:round;stroke-linejoin:round}
+.lk.dim{opacity:.18}
+.lk.focus .ln{stroke-width:3.6}
+.lk.new .ln{animation:drawin .5s ease-out}
+@keyframes drawin{from{stroke-dashoffset:400;stroke-dasharray:400}to{stroke-dashoffset:0;stroke-dasharray:400}}
+.lk.bad.new .ln{animation:none}
+.tmp{fill:none;stroke:var(--accent);stroke-width:2.2;stroke-dasharray:6 5;animation:march .6s linear infinite}
+.tmp-dot{fill:var(--accent)}
+@keyframes march{to{stroke-dashoffset:-22}}
+
+.tbl{position:absolute;width:max-content;min-width:236px;background:var(--surface);border:1px solid var(--line-2);border-radius:10px;box-shadow:var(--shadow-1);user-select:none;-webkit-user-select:none;transition:opacity .25s,box-shadow .2s}
+.tbl::before{content:"";position:absolute;left:-1px;right:-1px;top:-1px;height:4px;border-radius:10px 10px 0 0;background:var(--hue)}
+.tbl.dragging{box-shadow:var(--shadow-2);z-index:5}
+.tbl.dim{opacity:.28}
+.tbl.spot{box-shadow:0 0 0 2px var(--accent),var(--shadow-2)}
+.thead{display:flex;align-items:center;gap:8px;padding:11px 8px 9px 12px;border-bottom:1px solid var(--line);cursor:move;touch-action:none}
+.tglyph{width:18px;height:18px;border-radius:5px;background:color-mix(in srgb,var(--hue) 18%,transparent);color:var(--hue);display:grid;place-items:center;flex:none}
+.tglyph svg{width:12px;height:12px}
+.tname{font-family:var(--f-mono);font-weight:600;font-size:13.5px;flex:1;white-space:nowrap}
+.tcount{font-family:var(--f-mono);font-size:11px;color:var(--ink-3);white-space:nowrap}
+.tbtn{width:26px;height:26px;border-radius:6px;display:grid;place-items:center;color:var(--ink-3)}
+.tbtn:hover{background:var(--surface-3);color:var(--ink)}
+.tbtn svg{width:15px;height:15px}
+.cols{padding:4px 0 5px}
+.col{position:relative;display:grid;grid-template-columns:16px minmax(0,1fr) auto auto;align-items:center;gap:8px;height:30px;padding:0 12px;cursor:crosshair;touch-action:none;outline:none}
+.col:hover{background:var(--surface-2)}
+.col:focus-visible{background:var(--accent-soft);box-shadow:inset 0 0 0 2px var(--accent)}
+.col .kic{display:grid;place-items:center;color:var(--ink-3)}
+.col .kic svg{width:14px;height:14px}
+.col.is-pk .kic{color:var(--pk)}
+.col.is-fk .kic{color:var(--fk)}
+.cname{font-family:var(--f-mono);font-size:12.5px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.col.is-pk .cname{font-weight:600}
+.ctype{font-family:var(--f-mono);font-size:11px;color:var(--ink-3);white-space:nowrap}
+.cflags{display:flex;gap:3px;justify-content:flex-end;min-width:26px}
+.fl{font-family:var(--f-mono);font-style:normal;font-weight:600;font-size:9.5px;line-height:15px;height:16px;padding:0 4px;border-radius:4px;border:1px solid transparent;white-space:nowrap}
+.fl.pk{background:var(--pk-soft);color:var(--pk);border-color:color-mix(in srgb,var(--pk) 35%,transparent)}
+.fl.fk{color:var(--fk);border-color:color-mix(in srgb,var(--fk) 55%,transparent);background:transparent}
+.col.linked-ok .fl.fk{background:var(--fk);color:var(--surface);border-color:var(--fk)}
+.fl.uq{color:var(--uq);border-color:color-mix(in srgb,var(--uq) 45%,transparent)}
+.fl.nul{color:var(--ink-3);font-weight:500;font-style:italic;border-color:var(--line)}
+.port{position:absolute;top:50%;width:10px;height:10px;margin-top:-5px;border-radius:50%;background:var(--surface);border:2px solid var(--ink-3);opacity:0;transition:opacity .12s,transform .12s;pointer-events:none}
+.port.l{left:-6px}.port.r{right:-6px}
+.tbl:hover .col .port{opacity:.55}
+.col:hover .port,.col.armed .port,.col.target .port{opacity:1;border-color:var(--accent)}
+.col.linked-ok{box-shadow:inset 3px 0 0 var(--ok)}
+.col.linked-bad{box-shadow:inset 3px 0 0 var(--bad)}
+.col.armed{background:var(--accent-soft);box-shadow:inset 0 0 0 2px var(--accent)}
+.col.target{background:var(--accent-soft);box-shadow:inset 0 0 0 2px var(--accent)}
+.col.source{background:var(--accent-soft)}
+.col.pulse{animation:pulse 1.2s ease-in-out 3}
+@keyframes pulse{0%,100%{background:transparent}50%{background:color-mix(in srgb,var(--pk) 30%,transparent)}}
+#vp.linking .tbl:not(.src-tbl) .col:hover{background:var(--accent-soft)}
+
+/* zoom + minimap */
+.zoombar{position:absolute;right:max(14px,env(safe-area-inset-right,0px));top:14px;display:flex;flex-direction:column;gap:2px;background:var(--surface);border:1px solid var(--line);border-radius:11px;box-shadow:var(--shadow-1);padding:3px;z-index:6}
+.zoombar .ibtn{width:34px;height:34px}
+.zoombar .zl{font-family:var(--f-mono);font-size:10.5px;color:var(--ink-2);height:24px;width:34px;border-radius:7px}
+.zoombar .zl:hover{background:var(--surface-3)}
+.zoombar hr{border:0;height:1px;background:var(--line);margin:2px 4px}
+.minimap{position:absolute;right:max(14px,env(safe-area-inset-right,0px));bottom:14px;width:176px;height:116px;background:color-mix(in srgb,var(--surface) 92%,transparent);border:1px solid var(--line);border-radius:11px;box-shadow:var(--shadow-1);overflow:hidden;z-index:6;cursor:pointer;touch-action:none}
+.minimap canvas{width:100%;height:100%;display:block}
+.minimap .mm-lbl{position:absolute;left:8px;top:5px;font-family:var(--f-mono);font-size:9.5px;letter-spacing:.06em;text-transform:uppercase;color:var(--ink-3);pointer-events:none}
+.legend{position:absolute;left:max(14px,env(safe-area-inset-left,0px));bottom:14px;display:flex;flex-wrap:wrap;gap:6px 12px;align-items:center;background:color-mix(in srgb,var(--surface) 92%,transparent);border:1px solid var(--line);border-radius:10px;padding:7px 10px;font-size:11.5px;color:var(--ink-2);z-index:6;max-width:calc(100% - 250px)}
+.legend span{display:inline-flex;align-items:center;gap:5px;white-space:nowrap}
+.legend .sw{width:18px;height:0;border-top:2.2px solid var(--ok)}
+.legend .sw.bad{border-top:2.2px dashed var(--bad)}
+.legend .ch{width:16px;height:16px;border-radius:50%;border:1.5px solid var(--ink-3);display:inline-grid;place-items:center;font-family:var(--f-mono);font-size:9.5px;font-weight:600;color:var(--ink)}
+
+/* status bar */
+.statusbar{position:absolute;left:0;right:0;bottom:0;height:calc(var(--bot) + env(safe-area-inset-bottom,0px));padding-bottom:env(safe-area-inset-bottom,0px);padding-left:max(14px,env(safe-area-inset-left,0px));padding-right:max(14px,env(safe-area-inset-right,0px));display:flex;align-items:center;gap:16px;background:var(--surface);border-top:1px solid var(--line);z-index:30;font-size:13px}
+.prog{display:flex;align-items:center;gap:10px;min-width:0;flex:1 1 220px;max-width:340px}
+.prog-bar{flex:1;height:10px;border-radius:10px;background:var(--surface-3);overflow:hidden;position:relative}
+.prog-bar i{position:absolute;inset:0 auto 0 0;width:0;border-radius:10px;background:var(--accent);transition:width .5s cubic-bezier(.2,.8,.2,1)}
+.prog.full .prog-bar i{background:linear-gradient(90deg,var(--ok),color-mix(in srgb,var(--ok) 60%,var(--pk)),var(--ok));background-size:200% 100%;animation:sheen 2.4s linear infinite}
+@keyframes sheen{to{background-position:-200% 0}}
+.prog-pct{font-family:var(--f-mono);font-weight:600;font-size:16px;min-width:48px;text-align:right;font-variant-numeric:tabular-nums}
+.sb-item{display:flex;align-items:center;gap:7px;color:var(--ink-2);white-space:nowrap}
+.sb-item b{color:var(--ink);font-variant-numeric:tabular-nums}
+.pips{display:flex;gap:3px}
+.pips i{width:9px;height:9px;border-radius:2.5px;background:var(--surface-3);border:1px solid var(--line-2)}
+.pips i.on{background:var(--ok);border-color:var(--ok)}
+.badpill{display:inline-flex;align-items:center;gap:6px;height:28px;padding:0 11px;border-radius:999px;background:var(--bad-soft);color:var(--bad);font-weight:700;font-size:12.5px;border:1px solid color-mix(in srgb,var(--bad) 35%,transparent);animation:pop .3s ease-out}
+.badpill:hover{filter:brightness(.97)}
+@keyframes pop{0%{transform:scale(.7)}70%{transform:scale(1.08)}100%{transform:scale(1)}}
+.sb-sp{flex:1}
+.sb-time{font-family:var(--f-mono);font-variant-numeric:tabular-nums}
+
+/* popovers, tooltip */
+.pop{position:fixed;z-index:60;width:min(380px,calc(100vw - 24px));background:var(--surface);border:1px solid var(--line-2);border-radius:14px;box-shadow:var(--shadow-2);padding:16px;animation:popin .16s ease-out}
+@keyframes popin{from{opacity:0;transform:translateY(6px) scale(.98)}to{opacity:1;transform:none}}
+.pop h3{font-size:15px;font-weight:700;display:flex;align-items:center;gap:8px}
+.pop .pair{display:flex;flex-wrap:wrap;align-items:center;gap:6px;margin-top:10px;font-size:12.5px}
+.pop .pair code{background:var(--surface-2);border:1px solid var(--line);border-radius:6px;padding:2px 7px;font-size:12px}
+.pop .pair .arr{color:var(--ink-3)}
+.opts{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-top:12px}
+.opt{text-align:left;border:1.5px solid var(--line);border-radius:10px;padding:9px 10px;display:flex;flex-direction:column;gap:3px;background:var(--surface);transition:border-color .12s,background .12s}
+.opt:hover{border-color:var(--ink-3)}
+.opt[aria-checked="true"]{border-color:var(--accent);background:var(--accent-soft)}
+.opt .mk{font-family:var(--f-mono);font-weight:600;font-size:13px;display:flex;align-items:center;gap:6px}
+.opt b{font-size:12.5px}
+.opt small{font-size:11.5px;color:var(--ink-2);line-height:1.35}
+.pop .tip{margin-top:12px;font-size:12px;color:var(--ink-2);background:var(--surface-2);border-radius:8px;padding:8px 10px}
+.pop .tip b{color:var(--ink)}
+.pop-f{display:flex;justify-content:flex-end;gap:8px;margin-top:14px}
+.verdict{display:inline-flex;align-items:center;gap:6px;font-size:12px;font-weight:700;padding:3px 9px;border-radius:999px}
+.verdict.ok{background:var(--ok-soft);color:var(--ok)}
+.verdict.bad{background:var(--bad-soft);color:var(--bad)}
+.pop .reason{margin-top:10px;font-size:13px;color:var(--ink)}
+.pop .sqlon{margin-top:10px;font-family:var(--f-mono);font-size:12px;background:var(--surface-2);border:1px solid var(--line);border-radius:8px;padding:8px 10px;color:var(--ink-2);overflow-x:auto;white-space:nowrap}
+.seg{display:grid;grid-template-columns:repeat(4,1fr);gap:4px;margin-top:10px;background:var(--surface-2);border:1px solid var(--line);border-radius:9px;padding:3px}
+.seg button{height:30px;border-radius:6px;font-family:var(--f-mono);font-size:12.5px;font-weight:600;color:var(--ink-2)}
+.seg button:hover{background:var(--surface-3)}
+.seg button[aria-pressed="true"]{background:var(--surface);color:var(--ink);box-shadow:var(--shadow-1)}
+.tip-box{position:fixed;z-index:70;max-width:300px;background:var(--ink);color:var(--bg);border-radius:9px;padding:9px 11px;font-size:12px;line-height:1.45;pointer-events:none;box-shadow:var(--shadow-2)}
+.tip-box b{font-family:var(--f-mono);font-size:12.5px;display:block;margin-bottom:2px}
+.tip-box .tk{font-family:var(--f-mono);font-size:11px;opacity:.75;display:block;margin-bottom:4px}
+
+/* modals + drawers */
+.scrim{position:fixed;inset:0;background:var(--scrim);z-index:80;display:grid;place-items:center;padding:16px;animation:fade .2s ease-out}
+@keyframes fade{from{opacity:0}}
+.modal{background:var(--surface);border:1px solid var(--line);border-radius:16px;box-shadow:var(--shadow-2);width:min(560px,100%);max-height:calc(100vh - 32px);overflow:auto;padding:22px;animation:popin .2s ease-out}
+.modal.wide{width:min(860px,100%)}
+.modal h2{font-family:var(--f-display);font-size:24px;font-weight:700;letter-spacing:-.2px}
+.modal .sub{color:var(--ink-2);margin-top:4px}
+.modal-x{float:right;margin:-6px -6px 0 8px}
+.modal-f{display:flex;justify-content:flex-end;flex-wrap:wrap;gap:8px;margin-top:18px}
+.dtable-wrap{overflow:auto;margin-top:14px;border:1px solid var(--line);border-radius:10px;max-height:60vh}
+table.dt{border-collapse:collapse;width:100%;font-size:12.5px}
+.dt th,.dt td{padding:7px 10px;border-bottom:1px solid var(--line);text-align:left;white-space:nowrap}
+.dt th{position:sticky;top:0;background:var(--surface-2);font-family:var(--f-mono);font-weight:600;font-size:12px;z-index:1}
+.dt th small{display:block;font-weight:400;color:var(--ink-3);font-size:10.5px}
+.dt td{font-family:var(--f-mono);font-variant-numeric:tabular-nums}
+.dt tr:last-child td{border-bottom:0}
+.null{font-family:var(--f-mono);font-size:10.5px;font-weight:600;color:var(--ink-3);background:var(--surface-3);border-radius:4px;padding:1px 5px;font-style:italic}
+.drawer{position:fixed;top:0;bottom:0;right:0;width:min(460px,100vw);background:var(--surface);border-left:1px solid var(--line);box-shadow:var(--shadow-2);z-index:85;display:flex;flex-direction:column;animation:slidein .25s ease-out;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}
+@keyframes slidein{from{transform:translateX(30px);opacity:0}}
+.drawer-h{display:flex;align-items:center;gap:10px;padding:14px 16px;border-bottom:1px solid var(--line)}
+.drawer-h h2{font-family:var(--f-display);font-size:20px;font-weight:700;flex:1}
+.drawer-b{overflow:auto;padding:18px 20px 28px;flex:1}
+.guide h3{font-size:15px;font-weight:700;margin-top:22px;margin-bottom:6px;display:flex;align-items:center;gap:8px}
+.guide h3:first-child{margin-top:0}
+.guide p,.guide li{font-size:13.5px;color:var(--ink-2)}
+.guide p+p{margin-top:6px}
+.guide ul{display:flex;flex-direction:column;gap:5px;margin-top:6px}
+.guide li{padding-left:14px;position:relative}
+.guide li::before{content:"";position:absolute;left:2px;top:9px;width:5px;height:5px;border-radius:50%;background:var(--ink-3)}
+.guide code{font-size:12px;background:var(--surface-2);border:1px solid var(--line);border-radius:5px;padding:1px 5px;color:var(--ink)}
+.gvenn{display:grid;grid-template-columns:auto 1fr;gap:6px 12px;align-items:center;margin-top:8px}
+.gvenn svg{width:84px;height:auto}
+.gvenn b{font-family:var(--f-mono);font-size:12.5px;color:var(--ink)}
+.typetbl{width:100%;border-collapse:collapse;margin-top:8px;font-size:12.5px}
+.typetbl td{padding:5px 6px;border-bottom:1px solid var(--line);color:var(--ink-2);vertical-align:top}
+.typetbl td:first-child{font-family:var(--f-mono);color:var(--ink);white-space:nowrap}
+
+/* coach */
+.coach{position:absolute;left:50%;top:18px;transform:translateX(-50%);z-index:20;width:min(520px,calc(100% - 32px));background:var(--surface);border:1px solid var(--line-2);border-radius:14px;box-shadow:var(--shadow-2);padding:16px 18px;animation:popin .25s ease-out}
+.coach h3{font-family:var(--f-display);font-size:19px;font-weight:700}
+.coach ol{display:flex;flex-direction:column;gap:7px;margin-top:10px;counter-reset:c}
+.coach li{display:flex;gap:10px;font-size:13.5px;color:var(--ink-2);counter-increment:c}
+.coach li::before{content:counter(c);width:22px;height:22px;flex:none;border-radius:50%;background:var(--accent-soft);color:var(--accent);display:grid;place-items:center;font-family:var(--f-mono);font-size:11px;font-weight:700}
+.coach li b{color:var(--ink)}
+.coach .pop-f{margin-top:12px}
+
+/* toasts */
+.toasts{position:fixed;left:50%;bottom:calc(var(--bot) + 16px + env(safe-area-inset-bottom,0px));transform:translateX(-50%);z-index:90;display:flex;flex-direction:column;align-items:center;gap:8px;pointer-events:none;width:min(560px,calc(100vw - 32px))}
+.toast{background:var(--ink);color:var(--bg);border-radius:11px;padding:10px 14px;font-size:13.5px;box-shadow:var(--shadow-2);display:flex;align-items:center;gap:10px;animation:popin .2s ease-out;pointer-events:none;max-width:100%}
+.toast.ok{background:var(--ok);color:#fff}
+.toast.bad{background:var(--bad);color:#fff}
+.toast.out{opacity:0;transform:translateY(6px);transition:opacity .25s,transform .25s}
+body:not(.in-studio) .toasts{bottom:24px}
+body.in-studio .toasts{bottom:auto;top:calc(var(--top) + 14px + env(safe-area-inset-top,0px));flex-direction:column-reverse}
+body.lab-open .toasts{left:calc((100vw - var(--labw)) / 2);width:min(520px,calc(100vw - var(--labw) - 32px))}
+@media (max-width:900px){body.lab-open .toasts{left:50%;width:calc(100vw - 32px)}}
+
+/* ============ JOIN LAB ============ */
+.lab{position:absolute;top:calc(var(--top) + env(safe-area-inset-top,0px));bottom:calc(var(--bot) + env(safe-area-inset-bottom,0px));right:0;width:var(--labw);background:var(--surface);border-left:1px solid var(--line);z-index:25;display:flex;flex-direction:column;transform:translateX(100%);transition:transform .28s ease;box-shadow:var(--shadow-2)}
+body.lab-open .lab{transform:none}
+.lab-h{display:flex;align-items:center;gap:10px;padding:12px 16px;border-bottom:1px solid var(--line)}
+.lab-h h2{font-family:var(--f-display);font-size:20px;font-weight:700}
+.lab-h .qn{font-family:var(--f-mono);font-size:12px;color:var(--ink-3)}
+.qpips{display:flex;gap:6px;margin-left:auto}
+.qpip{min-width:30px;height:26px;padding:0 6px;border-radius:7px;border:1.5px solid var(--line-2);font-family:var(--f-mono);font-size:11px;font-weight:600;color:var(--ink-2);display:grid;place-items:center}
+.qpip[aria-current="true"]{border-color:var(--accent);color:var(--accent);background:var(--accent-soft)}
+.qpip.done{background:var(--ok);border-color:var(--ok);color:#fff}
+.lab-b{flex:1;overflow:auto;padding:16px 18px 20px;display:flex;flex-direction:column;gap:16px}
+.ask{font-size:17px;line-height:1.45;font-weight:500;text-wrap:pretty}
+.ask small{display:block;font-size:12px;font-weight:600;color:var(--ink-3);font-family:var(--f-mono);letter-spacing:.06em;text-transform:uppercase;margin-bottom:6px}
+.sqlrow{display:grid;grid-template-columns:minmax(0,1fr) 168px;gap:14px;align-items:center}
+.sql{font-family:var(--f-mono);font-size:13px;line-height:1.75;background:var(--surface-2);border:1px solid var(--line);border-radius:10px;padding:12px 14px;overflow-x:auto;white-space:pre;min-width:0}
+.sql .kw{color:var(--accent);font-weight:600}
+.sql .ta{color:var(--left);font-weight:600}
+.sql .tb{color:var(--right);font-weight:600}
+.slot{display:inline-block;min-width:74px;text-align:center;border-radius:6px;border:1.5px dashed var(--accent);color:var(--accent);padding:0 6px;font-weight:700;line-height:1.5}
+.slot.filled{border-style:solid;background:var(--accent);color:var(--accent-ink)}
+.venn-big svg{width:100%;height:auto;display:block}
+.venn-big text{font-family:var(--f-mono)}
+.jpick{display:grid;grid-template-columns:repeat(4,1fr);gap:8px}
+.jbtn{border:1.5px solid var(--line);border-radius:11px;padding:8px 6px 9px;display:flex;flex-direction:column;align-items:center;gap:4px;background:var(--surface);transition:border-color .12s,background .12s,transform .1s}
+.jbtn:hover{border-color:var(--ink-3)}
+.jbtn:active{transform:translateY(1px)}
+.jbtn[aria-checked="true"]{border-color:var(--accent);background:var(--accent-soft)}
+.jbtn svg{width:58px;height:auto}
+.jbtn b{font-family:var(--f-mono);font-size:12px;font-weight:600}
+.lab-sec h4{font-size:12px;font-family:var(--f-mono);letter-spacing:.06em;text-transform:uppercase;color:var(--ink-3);margin-bottom:8px;display:flex;align-items:center;gap:8px;flex-wrap:wrap}
+.lab-sec h4 .cnt{letter-spacing:0;text-transform:none;color:var(--ink-2)}
+.srcs{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+.src{border:1px solid var(--line);border-radius:10px;overflow:hidden;min-width:0}
+.src-h{display:flex;align-items:center;gap:6px;padding:6px 10px;font-family:var(--f-mono);font-size:12px;font-weight:600;border-bottom:1px solid var(--line)}
+.src.L .src-h{background:var(--left-soft);color:var(--left)}
+.src.R .src-h{background:var(--right-soft);color:var(--right)}
+.src-h .side{margin-left:auto;font-weight:500;font-size:10.5px;opacity:.85}
+.src .dtable-wrap{margin:0;border:0;border-radius:0;max-height:none}
+.src .dt th,.src .dt td{padding:5px 8px;font-size:11.5px}
+.src .dt th{position:static}
+.dt td.key{font-weight:600}
+.dt tr.nomatch td.key::after{content:"no match";margin-left:6px;font-size:9.5px;font-weight:600;color:var(--ink-3);border:1px solid var(--line-2);border-radius:4px;padding:0 4px;font-family:var(--f-body)}
+.dt tr.dropped td{opacity:.35;text-decoration:line-through}
+.dt tr.kept.nomatch td{background:color-mix(in srgb,var(--accent) 7%,transparent)}
+.result .dt tr.k-left td{background:color-mix(in srgb,var(--left) 8%,transparent)}
+.result .dt tr.k-right td{background:color-mix(in srgb,var(--right) 9%,transparent)}
+.result .dt tr td:first-child{position:relative;padding-left:14px}
+.result .dt tr.k-left td:first-child::before,.result .dt tr.k-right td:first-child::before,.result .dt tr.k-both td:first-child::before{content:"";position:absolute;left:0;top:0;bottom:0;width:4px}
+.result .dt tr.k-left td:first-child::before{background:var(--left)}
+.result .dt tr.k-right td:first-child::before{background:var(--right)}
+.result .dt tr.k-both td:first-child::before{background:linear-gradient(var(--left) 50%,var(--right) 50%)}
+.result .dt tr.newrow td{animation:rowin .35s ease-out}
+@keyframes rowin{from{opacity:0;transform:translateX(-6px)}}
+.result .dt th .al{color:var(--ink-3);font-weight:500}
+.empty{border:1.5px dashed var(--line-2);border-radius:10px;padding:18px;text-align:center;color:var(--ink-3);font-size:13px}
+.lab-f{border-top:1px solid var(--line);padding:12px 16px;display:flex;flex-direction:column;gap:10px;background:var(--surface)}
+.fb{border-radius:10px;padding:10px 12px;font-size:13.5px;display:flex;gap:10px;align-items:flex-start;animation:popin .2s ease-out}
+.fb .ic{margin-top:1px}
+.fb.ok{background:var(--ok-soft);color:color-mix(in srgb,var(--ok) 70%,var(--ink))}
+.fb.bad{background:var(--bad-soft);color:color-mix(in srgb,var(--bad) 75%,var(--ink))}
+.fb.info{background:var(--accent-soft);color:var(--ink)}
+.fb p+p{margin-top:4px}
+.lab-actions{display:flex;gap:8px;align-items:center}
+.lab-actions .grow{flex:1}
+.lab-intro{display:flex;flex-direction:column;gap:12px}
+.lab-intro h3{font-family:var(--f-display);font-size:22px;font-weight:700}
+.lab-intro p{color:var(--ink-2)}
+.lab-done{display:flex;flex-direction:column;align-items:center;text-align:center;gap:10px;padding:30px 10px}
+.lab-done h3{font-family:var(--f-display);font-size:24px}
+.lab-done p{color:var(--ink-2);max-width:42ch}
+.shake{animation:shake .4s ease-in-out}
+@keyframes shake{20%,60%{transform:translateX(-5px)}40%,80%{transform:translateX(5px)}}
+
+/* completion */
+.confetti{position:fixed;inset:0;z-index:95;pointer-events:none}
+.win{text-align:center}
+.win .modal{width:min(780px,100%)}
+.win h2{font-size:clamp(26px,4vw,36px)}
+.cert-img{display:block;width:100%;height:auto;border-radius:12px;border:1px solid var(--line);margin-top:16px;box-shadow:var(--shadow-1);background:#fff}
+.win .how{font-size:13px;color:var(--ink-2);margin-top:12px}
+.win .how kbd{font-size:11.5px;border:1px solid var(--line-2);border-bottom-width:2px;border-radius:5px;padding:0 5px;background:var(--surface-2)}
+.win .modal-f{justify-content:center}
+.seal{width:64px;height:64px;margin:0 auto 8px;border-radius:50%;background:var(--ok);color:#fff;display:grid;place-items:center;animation:sealin .6s cubic-bezier(.2,1.6,.4,1)}
+.seal svg{width:34px;height:34px}
+@keyframes sealin{from{transform:scale(0) rotate(-40deg)}}
+.vres{margin-top:14px;border-radius:10px;padding:12px 14px;font-size:13.5px}
+.vres.ok{background:var(--ok-soft)}
+.vres.bad{background:var(--bad-soft);color:var(--bad);font-weight:600}
+.vres dl{display:grid;grid-template-columns:auto 1fr;gap:4px 14px;margin:8px 0 0}
+.vres dt{color:var(--ink-2)}
+.vres dd{margin:0;font-weight:600}
+.vform{display:grid;gap:12px;margin-top:14px}
+.vform label{font-size:13px;font-weight:600;display:grid;gap:5px}
+.vform .field{height:42px;font-size:15px}
+
+/* responsive studio */
+@media (max-width:900px){
+  .tb-db span,.tb-tools .lbl{display:none}
+  .legend{display:none}
+  .sb-time-w,.sb-hints{display:none}
+}
+@media (max-width:640px){
+  :root{--top:52px;--bot:50px}
+  .tb-db b{font-size:16px}
+  .tb-sep{display:none}
+  .phase{padding:0 8px}
+  .phase .t-full{display:none}
+  .phase .t-short{display:inline}
+  .minimap{width:132px;height:88px}
+  .sb-wrong,.sb-lab .lbl,.sb-model .lbl,.pips{display:none}
+  .lbl-s{display:inline}
+  .tb-db b,.topbar .theme-btn{display:none}
+  .topbar{gap:6px}
+  .tb-tools .ibtn,.tb-tools .btn{width:34px;padding:0;justify-content:center}
+  .statusbar{gap:10px}
+  .prog{flex-basis:120px}
+  .sqlrow{grid-template-columns:1fr}
+  .venn-big{max-width:220px;margin:0 auto}
+  .srcs{grid-template-columns:1fr}
+  .jbtn svg{width:46px}
+  .opts{grid-template-columns:1fr}
+}
+@media (prefers-reduced-motion:reduce){*,*::before,*::after{animation:none!important;transition:none!important}}
+
+/* hero demo */
+.d-card{fill:var(--surface);stroke:var(--line-2);stroke-width:1}
+.d-name{font-family:var(--f-mono);font-size:13.5px;font-weight:600;fill:var(--ink)}
+.d-cnt{font-family:var(--f-mono);font-size:10.5px;fill:var(--ink-3)}
+.d-sep{stroke:var(--line);stroke-width:1}
+.d-hl{fill:var(--accent-soft)}
+.d-col{font-family:var(--f-mono);font-size:12px;fill:var(--ink)}
+.d-col.b{font-weight:600}
+.d-typ{font-family:var(--f-mono);font-size:10.5px;fill:var(--ink-3)}
+.d-pk{font-family:var(--f-mono);font-size:9.5px;font-weight:600;fill:var(--pk)}
+.d-fk{font-family:var(--f-mono);font-size:9.5px;font-weight:600;fill:var(--fk)}
+.d-draw{fill:none;stroke:var(--accent);stroke-width:2.2;stroke-linecap:round}
+.d-ok{fill:none;stroke:var(--ok);stroke-width:2.2}
+.d-chip{fill:var(--surface);stroke:var(--ok);stroke-width:1.6}
+.d-chipt{font-family:var(--f-mono);font-size:12px;font-weight:600;fill:var(--ink);text-anchor:middle;dominant-baseline:central}
+.d-st{fill:var(--ok)}
+.d-stp{fill:none;stroke:#fff;stroke-width:2;stroke-linecap:round;stroke-linejoin:round}
+.d-tag{fill:var(--ink)}
+.d-tagt{font-family:var(--f-mono);font-size:12px;font-weight:600;fill:var(--bg);dominant-baseline:central}
+.d-arrow{fill:var(--ink);stroke:var(--surface);stroke-width:1.2;stroke-linejoin:round}
+
+/* venn */
+.vf{fill:transparent;transition:fill .2s}
+.vf.on{fill:color-mix(in srgb,var(--accent) 36%,transparent)}
+.vo{fill:none;stroke-width:1.8;vector-effect:non-scaling-stroke}
+.vo.L{stroke:var(--left)}
+.vo.R{stroke:var(--right)}
+.vc{font-family:var(--f-mono);font-size:15px;font-weight:600;fill:var(--ink);text-anchor:middle}
+.vl{font-family:var(--f-mono);font-size:11px;font-weight:600;text-anchor:middle}
+.vl.L{fill:var(--left)}
+.vl.R{fill:var(--right)}
+
+/* cheat sheet minis */
+.jcard svg.rm{width:100%;max-width:240px}
+.rm-box{fill:var(--surface-2);stroke:var(--line-2)}
+.rm-t{font-family:var(--f-mono);font-size:9.5px;font-weight:600;fill:var(--ink);text-anchor:middle}
+.rm-l{stroke:var(--ok);stroke-width:2;fill:none}
+.rm-chip{fill:var(--surface);stroke:var(--ok);stroke-width:1.4}
+.rm-ct{font-family:var(--f-mono);font-size:9.5px;font-weight:700;fill:var(--ink);text-anchor:middle;dominant-baseline:central}
+
+</style>
+</head>
+<body>
+<div id="home">
+  <div class="wrap">
+    <header class="home-top">
+      <div class="brand"><span class="mark" aria-hidden="true">&#8904;</span><b>SQL Join Studio</b></div>
+      <nav>
+        <button class="btn ghost sm" data-act="guide">Primer</button>
+        <button class="ibtn theme-btn" data-act="theme" aria-label="Switch light or dark theme" title="Switch theme"></button>
+      </nav>
+    </header>
+
+    <section class="hero">
+      <div>
+        <p class="eyebrow">Hands-on keys, relationships and joins</p>
+        <h1>Build the data model. <em>Then master the joins.</em></h1>
+        <p class="lede">Pick an app you use every week. Drag each foreign key onto the primary key it points to, choose one-to-one or one-to-many, then answer real business questions with INNER, LEFT, RIGHT and FULL joins.</p>
+        <div class="namebox">
+          <label for="pname">Your name</label>
+          <input id="pname" class="field" type="text" autocomplete="name" placeholder="First and last name" maxlength="60">
+          <span class="help" id="pname-help">It goes on your completion certificate. Progress saves in this browser.</span>
+        </div>
+        <ol class="steps" aria-label="How it works">
+          <li><b>1</b>Connect the keys</li>
+          <li><b>2</b>Set 1:1 or 1:*</li>
+          <li><b>3</b>Solve the Join Lab</li>
+          <li><b>4</b>Copy your certificate</li>
+        </ol>
+      </div>
+      <div class="demo" aria-hidden="true">
+        <svg viewBox="0 0 560 300" id="demo-svg">
+          <g class="d-t">
+            <rect x="36" y="58" width="204" height="114" rx="9" class="d-card"/>
+            <rect x="36" y="58" width="204" height="5" rx="2.5" style="fill:var(--h2)"/>
+            <text x="52" y="84" class="d-name">orders</text>
+            <text x="226" y="84" class="d-cnt" text-anchor="end">7 rows</text>
+            <line x1="36" x2="240" y1="95" y2="95" class="d-sep"/>
+            <rect x="37" y="121" width="202" height="26" class="d-hl" opacity="0">
+              <animate attributeName="opacity" values="0;0;1;1;0;0" keyTimes="0;.08;.12;.55;.6;1" dur="6.5s" repeatCount="indefinite"/>
+            </rect>
+            <text x="52" y="113" class="d-col b">order_id</text><text x="178" y="113" class="d-typ">INT</text><text x="226" y="113" class="d-pk" text-anchor="end">PK</text>
+            <text x="52" y="139" class="d-col">customer_id</text><text x="178" y="139" class="d-typ">INT</text><text x="226" y="139" class="d-fk" text-anchor="end">FK</text>
+            <text x="52" y="165" class="d-col">total</text><text x="178" y="165" class="d-typ">DEC</text>
+          </g>
+          <g class="d-t">
+            <rect x="330" y="118" width="196" height="114" rx="9" class="d-card"/>
+            <rect x="330" y="118" width="196" height="5" rx="2.5" style="fill:var(--h1)"/>
+            <text x="346" y="144" class="d-name">customers</text>
+            <text x="512" y="144" class="d-cnt" text-anchor="end">5 rows</text>
+            <line x1="330" x2="526" y1="155" y2="155" class="d-sep"/>
+            <rect x="331" y="155" width="194" height="26" class="d-hl" opacity="0">
+              <animate attributeName="opacity" values="0;0;1;1;0;0" keyTimes="0;.4;.44;.6;.64;1" dur="6.5s" repeatCount="indefinite"/>
+            </rect>
+            <text x="346" y="173" class="d-col b">customer_id</text><text x="466" y="173" class="d-typ">INT</text><text x="512" y="173" class="d-pk" text-anchor="end">PK</text>
+            <text x="346" y="199" class="d-col">full_name</text><text x="466" y="199" class="d-typ">VARCHAR</text>
+            <text x="346" y="225" class="d-col">email</text><text x="466" y="225" class="d-typ">VARCHAR</text>
+          </g>
+          <path d="M240,134 C285,134 285,168 330,168" class="d-draw" pathLength="1" stroke-dasharray="1" stroke-dashoffset="1">
+            <animate attributeName="stroke-dashoffset" values="1;1;0;0;0" keyTimes="0;.24;.43;.9;1" dur="6.5s" repeatCount="indefinite"/>
+            <animate attributeName="opacity" values="1;1;0;0;1" keyTimes="0;.54;.56;.99;1" dur="6.5s" repeatCount="indefinite"/>
+          </path>
+          <g opacity="0" class="d-okg">
+            <animate attributeName="opacity" values="0;0;1;1;0;0" keyTimes="0;.54;.58;.9;.95;1" dur="6.5s" repeatCount="indefinite"/>
+            <path d="M240,134 C285,134 285,168 330,168" class="d-ok"/>
+            <circle cx="256" cy="134" r="9" class="d-chip"/><text x="256" y="134" class="d-chipt">*</text>
+            <circle cx="314" cy="168" r="9" class="d-chip"/><text x="314" y="168" class="d-chipt">1</text>
+            <circle cx="285" cy="151" r="9" class="d-st"/><path d="M281,151 l3,3 l5,-6" class="d-stp"/>
+            <rect x="214" y="250" width="142" height="28" rx="14" class="d-tag"/>
+            <text x="285" y="264" class="d-tagt" text-anchor="middle">* : 1  Many to one</text>
+          </g>
+          <g class="d-cur" opacity="0">
+            <animate attributeName="opacity" values="0;0;1;1;0;0" keyTimes="0;.06;.1;.55;.6;1" dur="6.5s" repeatCount="indefinite"/>
+            <animateMotion path="M168,134 L240,134 C285,134 285,168 330,168 L372,168" keyPoints="0;0;1;1" keyTimes="0;.12;.5;1" calcMode="linear" dur="6.5s" repeatCount="indefinite"/>
+            <path d="M0,0 L0,17 L4.5,13 L7.5,20 L10.5,18.6 L7.6,12 L13,12 Z" class="d-arrow"/>
+          </g>
+        </svg>
+        <span class="cap">Drag a foreign key onto its primary key</span>
+      </div>
+    </section>
+
+    <section class="sec" aria-labelledby="pick-h">
+      <div class="sec-h">
+        <h2 id="pick-h">Choose a database</h2>
+        <p>Each one starts with its tables laid out and no relationships. You connect them.</p>
+      </div>
+      <div class="dbgrid" id="dbgrid"></div>
+    </section>
+
+    <section class="sec" aria-labelledby="joins-h">
+      <div class="sec-h">
+        <h2 id="joins-h">Joins at a glance</h2>
+        <p>The shaded area is what the query keeps. Order matters: the left table is the one written before JOIN.</p>
+      </div>
+      <div class="joingrid" id="joingrid"></div>
+    </section>
+
+    <footer class="home-foot">
+      <span>Practice databases inspired by apps you know. Tables and sample data are simplified and made up. Not affiliated with any of these companies.</span>
+      <button class="lnk" data-act="verify">Instructor: verify a certificate code</button>
+    </footer>
+  </div>
+</div>
+
+<div id="studio" hidden>
+  <header class="topbar">
+    <button class="ibtn" data-act="home" aria-label="Back to databases" title="Back to databases" id="btn-back"></button>
+    <div class="tb-db" id="tb-db"></div>
+    <span class="tb-sep" aria-hidden="true"></span>
+    <nav class="phases" aria-label="Activity steps">
+      <button class="phase" id="ph-model" data-act="phase-model" aria-current="step"><span class="n">1</span><span class="t-full">Build the model</span><span class="t-short">Model</span></button>
+      <button class="phase" id="ph-lab" data-act="phase-lab"><span class="n">2</span><span class="t-full">Join Lab</span><span class="t-short">Joins</span></button>
+    </nav>
+    <div class="tb-tools">
+      <button class="btn ghost sm hint-btn" data-act="hint" title="Get a hint"><span class="ico-hint"></span><span class="lbl">Hint</span></button>
+      <button class="btn ghost sm" data-act="guide" title="Open the guide"><span class="ico-guide"></span><span class="lbl">Guide</span></button>
+      <button class="btn ghost sm" data-act="cert" id="btn-cert" hidden title="Show certificate"><span class="ico-cert"></span><span class="lbl">Certificate</span></button>
+      <button class="ibtn" data-act="reset" aria-label="Start this database over" title="Start over"><span class="ico-reset"></span></button>
+      <button class="ibtn theme-btn" data-act="theme" aria-label="Switch light or dark theme" title="Switch theme"></button>
+    </div>
+  </header>
+
+  <div id="vp" aria-label="Diagram canvas. Drag empty space to pan, scroll to zoom.">
+    <div id="world"><svg id="links" aria-hidden="true"><g id="links-g" transform="translate(6000,6000)"></g></svg></div>
+    <div class="zoombar" role="group" aria-label="Zoom">
+      <button class="ibtn" data-act="zin" aria-label="Zoom in" title="Zoom in (+)"></button>
+      <button class="zl" data-act="z100" id="zl" title="Reset to 100%">100%</button>
+      <button class="ibtn" data-act="zout" aria-label="Zoom out" title="Zoom out (-)"></button>
+      <hr>
+      <button class="ibtn" data-act="fit" aria-label="Fit diagram to screen" title="Fit to screen (0)"></button>
+      <button class="ibtn" data-act="tidy" aria-label="Restore the original table layout" title="Restore layout"></button>
+    </div>
+    <div class="minimap" id="minimap" title="Overview. Click or drag to move around."><canvas id="mm"></canvas><span class="mm-lbl">Overview</span></div>
+    <div class="legend" aria-hidden="true">
+      <span><b class="fl pk">PK</b>primary key</span>
+      <span><b class="fl fk">FK</b>foreign key</span>
+      <span><b class="fl uq">UQ</b>unique</span>
+      <span><i class="fl nul">null</i>can be empty</span>
+      <span><i class="sw"></i>correct</span>
+      <span><i class="sw bad"></i>incorrect</span>
+      <span><i class="ch">1</i><i class="ch">*</i>one, many</span>
+    </div>
+  </div>
+
+  <aside class="lab" id="lab" aria-label="Join Lab">
+    <div class="lab-h"><h2>Join Lab</h2><div class="qpips" id="qpips"></div><button class="ibtn" data-act="lab-close" aria-label="Close Join Lab" title="Close" id="lab-x"></button></div>
+    <div class="lab-b" id="lab-b"></div>
+    <div class="lab-f" id="lab-f"></div>
+  </aside>
+
+  <footer class="statusbar" aria-label="Progress">
+    <div class="prog" id="prog"><div class="prog-bar"><i id="prog-i"></i></div><span class="prog-pct" id="prog-pct">0%</span></div>
+    <div class="sb-item sb-model"><span class="lbl">Relationships</span><span class="lbl-s">Model</span><b id="sb-rel">0/0</b><span class="pips" id="sb-pips"></span></div>
+    <button class="badpill" id="sb-bad" hidden data-act="show-bad"></button>
+    <div class="sb-item sb-lab"><span class="lbl">Join Lab</span><span class="lbl-s">Joins</span><b id="sb-lab">0/4</b></div>
+    <span class="sb-sp"></span>
+    <div class="sb-item sb-wrong" title="Wrong tries so far"><span class="ico-x"></span><b id="sb-wrong">0</b><span class="lbl">wrong tries</span></div>
+    <div class="sb-item sb-hints" title="Hints used"><span class="ico-hint"></span><b id="sb-hints">0</b><span class="lbl">hints</span></div>
+    <div class="sb-item sb-time-w" title="Time on this database"><span class="ico-clock"></span><b class="sb-time" id="sb-time">0:00</b></div>
+  </footer>
+</div>
+
+<div class="toasts" id="toasts" aria-live="polite"></div>
+<div class="sr" id="live" aria-live="assertive"></div>
+
+<script>
+/* Practice databases. Column spec: [name, type, flags, description]. Flags: pk fk uq null (null = column allows NULL). */
+const DBS = [
+{
+  id:'uber', name:'Uber', domain:'Ride sharing', icon:'car', tint:'#3b4a5c',
+  blurb:'Riders request trips, drivers accept them, and every finished trip gets paid.',
+  layout:[['riders','promos'],['rides','payments'],['drivers','vehicles']],
+  tables:{
+    riders:{one:'rider',many:'riders',label:'{full_name}',desc:'People who request rides in the app.',
+      cols:[['rider_id','INT','pk'],['full_name','VARCHAR(80)',''],['email','VARCHAR(120)','uq','No two riders can share an email.'],['home_city','VARCHAR(40)',''],['signup_date','DATE','']],
+      rows:[[1,'Ava Thompson','ava.thompson@mail.com','Chicago','2023-02-11'],[2,'Liam Carter','liam.carter@mail.com','Chicago','2023-06-30'],[3,'Sofia Ramirez','sofia.ramirez@mail.com','Austin','2024-01-08'],[4,'Noah Patel','noah.patel@mail.com','Austin','2024-03-19'],[5,'Emma Johnson','emma.johnson@mail.com','Denver','2025-07-02']]},
+    drivers:{one:'driver',many:'drivers',label:'{full_name}',desc:'People who drive for the platform.',
+      cols:[['driver_id','INT','pk'],['full_name','VARCHAR(80)',''],['rating','DECIMAL(3,2)','null','Average star rating. Empty until the first rated trip.'],['city','VARCHAR(40)',''],['joined_on','DATE','']],
+      rows:[[101,'Marcus Hill',4.92,'Chicago','2021-04-12'],[102,'Priya Shah',4.88,'Chicago','2022-09-01'],[103,'Diego Alvarez',4.75,'Austin','2023-01-15'],[104,'Grace Kim',4.97,'Austin','2023-05-22'],[105,'Tyler Brooks',null,'Denver','2026-09-28']]},
+    vehicles:{one:'car',many:'cars',label:'{make} {model}',desc:'Cars registered for driving.',
+      cols:[['vehicle_id','INT','pk'],['driver_id','INT','fk uq null','The driver who uses this car. UNIQUE, so a driver has at most one car on file. Empty when no driver is assigned.'],['make','VARCHAR(30)',''],['model','VARCHAR(30)',''],['plate','CHAR(7)','uq'],['seats','TINYINT','']],
+      rows:[[501,101,'Toyota','Camry','KXT4921',4],[502,102,'Honda','Accord','LMP7330',4],[503,103,'Tesla','Model 3','TXR9552',4],[504,null,'Ford','Escape','COB2118',4],[505,104,'Kia','Niro','TXJ3774',4]]},
+    rides:{one:'ride',many:'rides',label:'ride {ride_id}',desc:'One row for every trip a rider requests.',
+      cols:[['ride_id','INT','pk'],['rider_id','INT','fk','The rider who requested the trip.'],['driver_id','INT','fk null','The driver who accepted. Empty when no driver accepted.'],['promo_id','INT','fk null','Promo code applied to the fare. Empty when none was used.'],['requested_at','DATETIME',''],['distance_mi','DECIMAL(5,1)','null'],['status','VARCHAR(12)','']],
+      rows:[[9001,1,101,null,'2026-09-01 08:15',5.2,'completed'],[9002,2,102,31,'2026-09-01 18:40',12.8,'completed'],[9003,1,103,null,'2026-09-02 07:55',3.4,'completed'],[9004,3,101,32,'2026-09-02 21:10',7.9,'completed'],[9005,4,104,null,'2026-09-03 12:05',2.1,'completed'],[9006,3,null,null,'2026-09-03 23:30',null,'canceled'],[9007,2,102,31,'2026-09-04 09:20',15.6,'in_progress']]},
+    payments:{one:'payment',many:'payments',label:'payment {payment_id}',desc:'Money collected for finished rides.',
+      cols:[['payment_id','INT','pk'],['ride_id','INT','fk uq','The ride this payment covers. UNIQUE, so each ride is paid once.'],['amount','DECIMAL(8,2)',''],['method','VARCHAR(12)',''],['paid_at','DATETIME','']],
+      rows:[[7001,9001,14.20,'card','2026-09-01 08:34'],[7002,9002,25.40,'apple_pay','2026-09-01 19:12'],[7003,9003,9.80,'card','2026-09-02 08:09'],[7004,9004,17.48,'paypal','2026-09-02 21:31'],[7005,9005,7.60,'card','2026-09-03 12:16']]},
+    promos:{one:'promo code',many:'promo codes',label:'{code}',desc:'Discount codes riders can apply.',
+      cols:[['promo_id','INT','pk'],['code','VARCHAR(12)','uq'],['discount_pct','TINYINT',''],['expires_on','DATE','']],
+      rows:[[31,'FALL20',20,'2026-11-30'],[32,'RIDE5',5,'2026-12-31'],[33,'NEWYEAR',15,'2027-01-15']]}
+  },
+  rels:[['rides.rider_id','riders.rider_id','N:1'],['rides.driver_id','drivers.driver_id','N:1'],['vehicles.driver_id','drivers.driver_id','1:1'],['payments.ride_id','rides.ride_id','1:1'],['rides.promo_id','promos.promo_id','N:1']],
+  joins:[
+    {type:'LEFT',ask:'List every driver with their rides. Drivers who haven\'t given a ride yet must still appear.',left:['drivers','d'],right:['rides','r'],on:['driver_id','driver_id'],select:['d.full_name','r.ride_id','r.status'],lo:'drivers with no rides',ro:'rides with no driver'},
+    {type:'INNER',ask:'Show only the rides that used a promo code, along with the code.',left:['rides','r'],right:['promos','p'],on:['promo_id','promo_id'],select:['r.ride_id','p.code','p.discount_pct'],lo:'rides with no promo code',ro:'promo codes nobody used'},
+    {type:'RIGHT',ask:'List every driver and the car they drive. Drivers without a car on file must still appear.',left:['vehicles','v'],right:['drivers','d'],on:['driver_id','driver_id'],select:['d.full_name','v.make','v.model'],lo:'cars with no driver',ro:'drivers with no car'},
+    {type:'FULL',ask:'For the weekly operations review, list every driver and every ride together. Keep idle drivers and rides that never got a driver.',left:['drivers','d'],right:['rides','r'],on:['driver_id','driver_id'],select:['d.full_name','r.ride_id','r.status'],lo:'drivers with no rides',ro:'rides with no driver'}
+  ]
+},
+{
+  id:'doordash', name:'DoorDash', domain:'Food delivery', icon:'bag', tint:'#c4492d',
+  blurb:'Customers order from restaurants, Dashers deliver, and support handles problems.',
+  layout:[['customers','dashpass_members'],['orders','support_tickets'],['restaurants','dashers']],
+  tables:{
+    customers:{one:'customer',many:'customers',label:'{full_name}',desc:'People who order food.',
+      cols:[['customer_id','INT','pk'],['full_name','VARCHAR(80)',''],['email','VARCHAR(120)','uq'],['zip_code','CHAR(5)','']],
+      rows:[[1,'Olivia Brown','olivia.brown@mail.com','60614'],[2,'Ethan Davis','ethan.davis@mail.com','60622'],[3,'Mia Wilson','mia.wilson@mail.com','78701'],[4,'James Miller','james.miller@mail.com','78704'],[5,'Harper Moore','harper.moore@mail.com','10001']]},
+    dashpass_members:{one:'membership',many:'memberships',label:'membership {member_id}',desc:'Paid DashPass subscriptions.',
+      cols:[['member_id','INT','pk'],['customer_id','INT','fk uq','The customer on this membership. UNIQUE, so a customer holds one DashPass at most.'],['plan','VARCHAR(10)',''],['renews_on','DATE','']],
+      rows:[[801,1,'annual','2027-03-01'],[802,3,'monthly','2026-11-12'],[803,4,'monthly','2026-11-20']]},
+    restaurants:{one:'restaurant',many:'restaurants',label:'{name}',desc:'Restaurants on the app.',
+      cols:[['restaurant_id','INT','pk'],['name','VARCHAR(80)',''],['cuisine','VARCHAR(30)',''],['city','VARCHAR(40)','']],
+      rows:[[11,'Lou\'s Deep Dish','Pizza','Chicago'],[12,'Taqueria Sol','Mexican','Austin'],[13,'Golden Wok','Chinese','Chicago'],[14,'Green Bowl','Salads','Austin'],[15,'Bagel Corner','Bakery','New York']]},
+    dashers:{one:'Dasher',many:'Dashers',label:'{full_name}',desc:'Couriers who deliver orders.',
+      cols:[['dasher_id','INT','pk'],['full_name','VARCHAR(80)',''],['vehicle_type','VARCHAR(12)',''],['is_active','BOOLEAN','']],
+      rows:[[41,'Chloe Nguyen','car',true],[42,'Andre Wright','bike',true],[43,'Hannah Scott','scooter',true],[44,'Luis Ortega','car',false]]},
+    orders:{one:'order',many:'orders',label:'order {order_id}',desc:'One row per checkout.',
+      cols:[['order_id','INT','pk'],['customer_id','INT','fk','The customer who placed the order.'],['restaurant_id','INT','fk','The restaurant that made the food.'],['dasher_id','INT','fk null','The Dasher who delivered. Empty for pickup orders.'],['ordered_at','DATETIME',''],['total','DECIMAL(8,2)','']],
+      rows:[[3001,1,11,41,'2026-09-05 18:22',31.49],[3002,2,13,42,'2026-09-05 19:05',22.10],[3003,3,12,43,'2026-09-06 12:40',18.75],[3004,1,14,null,'2026-09-06 13:15',12.40],[3005,4,12,41,'2026-09-07 20:02',27.30],[3006,3,14,43,'2026-09-08 11:48',15.90],[3007,2,11,null,'2026-09-08 17:30',24.99]]},
+    support_tickets:{one:'ticket',many:'tickets',label:'ticket {ticket_id}',desc:'Help requests sent to support.',
+      cols:[['ticket_id','INT','pk'],['order_id','INT','fk null','The order this ticket is about. Empty for general account questions.'],['contact_email','VARCHAR(120)',''],['topic','VARCHAR(40)',''],['opened_at','DATETIME','']],
+      rows:[[61,3002,'ethan.davis@mail.com','Missing item','2026-09-05 19:50'],[62,null,'harper.moore@mail.com','Login problem','2026-09-06 09:12'],[63,3005,'james.miller@mail.com','Late delivery','2026-09-07 21:10'],[64,null,'mia.wilson@mail.com','Update card','2026-09-08 08:30']]}
+  },
+  rels:[['dashpass_members.customer_id','customers.customer_id','1:1'],['orders.customer_id','customers.customer_id','N:1'],['orders.restaurant_id','restaurants.restaurant_id','N:1'],['orders.dasher_id','dashers.dasher_id','N:1'],['support_tickets.order_id','orders.order_id','N:1']],
+  joins:[
+    {type:'INNER',ask:'Show only the orders a Dasher delivered, with the Dasher\'s name.',left:['orders','o'],right:['dashers','d'],on:['dasher_id','dasher_id'],select:['o.order_id','d.full_name','o.total'],lo:'pickup orders with no Dasher',ro:'Dashers with no deliveries'},
+    {type:'LEFT',ask:'List every order and any support ticket about it. Orders with no ticket must still appear.',left:['orders','o'],right:['support_tickets','t'],on:['order_id','order_id'],select:['o.order_id','t.ticket_id','t.topic'],lo:'orders with no ticket',ro:'tickets not about an order'},
+    {type:'FULL',ask:'For a delivery audit, list every Dasher and every order together. Keep Dashers with no deliveries and orders with no Dasher.',left:['dashers','d'],right:['orders','o'],on:['dasher_id','dasher_id'],select:['d.full_name','o.order_id','o.total'],lo:'Dashers with no deliveries',ro:'pickup orders with no Dasher'},
+    {type:'RIGHT',ask:'List every support ticket and the order it\'s about. General tickets with no order must still appear.',left:['orders','o'],right:['support_tickets','t'],on:['order_id','order_id'],select:['t.ticket_id','t.topic','o.order_id'],lo:'orders with no ticket',ro:'general tickets with no order'}
+  ]
+},
+{
+  id:'netflix', name:'Netflix', domain:'Video streaming', icon:'play', tint:'#a82a33',
+  blurb:'Accounts pay for a plan, profiles watch titles, and every play is logged.',
+  layout:[['plans','billing'],['accounts','profiles'],['viewing_history'],['titles','genres']],
+  tables:{
+    plans:{one:'plan',many:'plans',label:'{plan_name}',desc:'Membership plans and prices.',
+      cols:[['plan_id','INT','pk'],['plan_name','VARCHAR(30)',''],['monthly_price','DECIMAL(5,2)',''],['max_screens','TINYINT','']],
+      rows:[[1,'Standard with ads',7.99,2],[2,'Standard',17.99,2],[3,'Premium',24.99,4],[4,'Basic (retired)',11.99,1]]},
+    accounts:{one:'account',many:'accounts',label:'{email}',desc:'One row per household membership.',
+      cols:[['account_id','INT','pk'],['email','VARCHAR(120)','uq'],['plan_id','INT','fk null','The plan this account pays for. Empty when the membership is canceled.'],['country','CHAR(2)',''],['created_on','DATE','']],
+      rows:[[1001,'jordan.reyes@mail.com',3,'US','2019-05-14'],[1002,'kim.family@mail.com',2,'US','2020-11-02'],[1003,'alex.chen@mail.com',1,'US','2023-08-21'],[1004,'sam.ortiz@mail.com',null,'US','2021-03-09'],[1005,'taylor.nguyen@mail.com',2,'CA','2024-12-01']]},
+    billing:{one:'billing record',many:'billing records',label:'billing {billing_id}',desc:'The card on file for each paying account.',
+      cols:[['billing_id','INT','pk'],['account_id','INT','fk uq','The account being billed. UNIQUE, so each account has one billing record.'],['card_brand','VARCHAR(20)',''],['last4','CHAR(4)',''],['next_bill_date','DATE','']],
+      rows:[[2001,1001,'Visa','4242','2026-11-14'],[2002,1002,'Mastercard','5100','2026-11-02'],[2003,1003,'Amex','3005','2026-11-21'],[2004,1005,'Visa','1881','2026-11-01']]},
+    profiles:{one:'profile',many:'profiles',label:'{profile_name}',desc:'Viewer profiles inside an account.',
+      cols:[['profile_id','INT','pk'],['account_id','INT','fk','The account this profile lives under.'],['profile_name','VARCHAR(30)',''],['is_kids','BOOLEAN','']],
+      rows:[[1,1001,'Jordan',false],[2,1001,'Kids',true],[3,1002,'Dana',false],[4,1002,'Leo',true],[5,1003,'Alex',false],[6,1005,'Taylor',false]]},
+    viewing_history:{one:'viewing record',many:'viewing records',label:'view {view_id}',desc:'One row each time a profile watches a title.',
+      cols:[['view_id','INT','pk'],['profile_id','INT','fk','The profile that pressed play.'],['title_id','INT','fk','The movie or series watched.'],['watched_at','DATETIME',''],['minutes_watched','SMALLINT','']],
+      rows:[[70001,1,501,'2026-09-10 21:00',52],[70002,2,505,'2026-09-10 17:30',101],[70003,3,502,'2026-09-11 20:15',58],[70004,1,504,'2026-09-12 22:40',61],[70005,5,503,'2026-09-13 19:05',139],[70006,6,506,'2026-09-14 21:30',47],[70007,3,504,'2026-09-15 20:00',55]]},
+    titles:{one:'title',many:'titles',label:'{title_name}',desc:'Movies and series in the catalog.',
+      cols:[['title_id','INT','pk'],['title_name','VARCHAR(100)',''],['title_type','VARCHAR(6)',''],['release_year','SMALLINT',''],['genre_id','INT','fk null','Genre tag. Empty for new arrivals that aren\'t tagged yet.']],
+      rows:[[501,'Stranger Things','series',2016,1],[502,'The Crown','series',2016,2],[503,'Glass Onion','movie',2022,3],[504,'Squid Game','series',2021,2],[505,'Nimona','movie',2023,4],[506,'Wednesday','series',2022,3],[507,'Harbor Lights','movie',2026,null]]},
+    genres:{one:'genre',many:'genres',label:'{genre_name}',desc:'Genre tags used to browse.',
+      cols:[['genre_id','INT','pk'],['genre_name','VARCHAR(30)','uq']],
+      rows:[[1,'Sci-Fi'],[2,'Drama'],[3,'Mystery'],[4,'Animation'],[5,'Documentary']]}
+  },
+  rels:[['accounts.plan_id','plans.plan_id','N:1'],['billing.account_id','accounts.account_id','1:1'],['profiles.account_id','accounts.account_id','N:1'],['viewing_history.profile_id','profiles.profile_id','N:1'],['viewing_history.title_id','titles.title_id','N:1'],['titles.genre_id','genres.genre_id','N:1']],
+  joins:[
+    {type:'RIGHT',ask:'List every plan and the accounts on it. Plans with no accounts must still appear.',left:['accounts','a'],right:['plans','p'],on:['plan_id','plan_id'],select:['p.plan_name','a.email'],lo:'canceled accounts with no plan',ro:'plans nobody is on'},
+    {type:'FULL',ask:'For a catalog cleanup, list every genre and every title together. Keep empty genres and titles still waiting for a genre.',left:['genres','g'],right:['titles','t'],on:['genre_id','genre_id'],select:['g.genre_name','t.title_name'],lo:'genres with no titles',ro:'titles with no genre'},
+    {type:'INNER',ask:'Show only the accounts that are on a plan right now, with the monthly price.',left:['accounts','a'],right:['plans','p'],on:['plan_id','plan_id'],select:['a.email','p.plan_name','p.monthly_price'],lo:'canceled accounts with no plan',ro:'plans nobody is on'},
+    {type:'LEFT',ask:'List every title with its genre. Titles that don\'t have a genre yet must still appear.',left:['titles','t'],right:['genres','g'],on:['genre_id','genre_id'],select:['t.title_name','t.release_year','g.genre_name'],lo:'titles with no genre',ro:'genres with no titles'}
+  ]
+},
+{
+  id:'amazon', name:'Amazon', domain:'Online shopping', icon:'box', tint:'#b9770e',
+  blurb:'Customers check out baskets of products from Amazon and third-party sellers.',
+  layout:[['customers','addresses'],['orders','shipments'],['order_items'],['products','sellers']],
+  tables:{
+    customers:{one:'customer',many:'customers',label:'{full_name}',desc:'Shopper accounts.',
+      cols:[['customer_id','INT','pk'],['full_name','VARCHAR(80)',''],['email','VARCHAR(120)','uq'],['is_prime','BOOLEAN','']],
+      rows:[[1,'Rachel Adams','rachel.adams@mail.com',true],[2,'David Kim','david.kim@mail.com',false],[3,'Maria Lopez','maria.lopez@mail.com',true],[4,'Kevin Turner','kevin.turner@mail.com',true]]},
+    addresses:{one:'address',many:'addresses',label:'{street}, {city}',desc:'Saved shipping addresses.',
+      cols:[['address_id','INT','pk'],['customer_id','INT','fk','The customer who saved this address.'],['street','VARCHAR(100)',''],['city','VARCHAR(40)',''],['state','CHAR(2)',''],['zip','CHAR(5)','']],
+      rows:[[11,1,'412 Oak St','Seattle','WA','98101'],[12,1,'90 Pine Ave','Bellevue','WA','98004'],[13,2,'7 Elm Ct','Portland','OR','97201'],[14,3,'1550 Lake Dr','Miami','FL','33101'],[15,4,'22 Birch Rd','Phoenix','AZ','85001']]},
+    orders:{one:'order',many:'orders',label:'order {order_id}',desc:'One row per checkout.',
+      cols:[['order_id','INT','pk'],['customer_id','INT','fk','The customer who checked out.'],['shipping_address_id','INT','fk null','Where the order ships. Empty for digital orders like eBooks.'],['ordered_at','DATETIME',''],['order_total','DECIMAL(9,2)','']],
+      rows:[[5001,1,11,'2026-09-02 10:14',49.99],[5002,2,13,'2026-09-03 16:40',97.99],[5003,3,null,'2026-09-04 09:05',14.99],[5004,1,11,'2026-09-06 20:22',24.99],[5005,3,14,'2026-09-07 13:30',69.00],[5006,4,null,'2026-09-08 08:12',9.99]]},
+    order_items:{one:'order line',many:'order lines',label:'line {order_item_id}',desc:'Each product inside an order.',
+      cols:[['order_item_id','INT','pk'],['order_id','INT','fk','The order this line belongs to.'],['product_id','INT','fk','The product bought.'],['quantity','SMALLINT',''],['unit_price','DECIMAL(8,2)','']],
+      rows:[[1,5001,301,1,49.99],[2,5002,304,2,29.00],[3,5002,305,1,39.99],[4,5003,303,1,14.99],[5,5004,302,1,24.99],[6,5005,306,2,34.50],[7,5006,307,1,9.99]]},
+    products:{one:'product',many:'products',label:'{product_name}',desc:'Items for sale.',
+      cols:[['product_id','INT','pk'],['product_name','VARCHAR(120)',''],['category','VARCHAR(30)',''],['price','DECIMAL(8,2)',''],['seller_id','INT','fk null','The third-party seller. Empty when Amazon sells the item itself.']],
+      rows:[[301,'Echo Dot (5th Gen)','Electronics',49.99,null],[302,'Insulated Water Bottle','Kitchen',24.99,73],[303,'The Midnight Library (Kindle)','Books',14.99,null],[304,'Yoga Mat','Sports',29.00,72],[305,'USB-C Charger 65W','Electronics',39.99,71],[306,'LED Desk Lamp','Home',34.50,73],[307,'Movie Rental (HD)','Video',9.99,null]]},
+    sellers:{one:'seller',many:'sellers',label:'{seller_name}',desc:'Third-party marketplace sellers.',
+      cols:[['seller_id','INT','pk'],['seller_name','VARCHAR(80)',''],['rating','DECIMAL(2,1)','null'],['joined_on','DATE','']],
+      rows:[[71,'BrightGear Co.',4.8,'2019-03-02'],[72,'ZenFit Supply',4.6,'2020-07-15'],[73,'Lumen Home',4.7,'2021-11-30'],[74,'Coastal Prints',null,'2026-09-20']]},
+    shipments:{one:'shipment',many:'shipments',label:'shipment {shipment_id}',desc:'Packages handed to a carrier.',
+      cols:[['shipment_id','INT','pk'],['order_id','INT','fk uq','The order in this box. UNIQUE, so each order ships in one package here.'],['carrier','VARCHAR(20)',''],['tracking_no','VARCHAR(30)','uq'],['delivered_on','DATE','null']],
+      rows:[[801,5001,'UPS','1Z999AA10123456784','2026-09-04'],[802,5002,'USPS','9400111899223344556677','2026-09-07'],[803,5004,'Amazon Logistics','TBA301245566000',null],[804,5005,'FedEx','771234567890','2026-09-10']]}
+  },
+  rels:[['addresses.customer_id','customers.customer_id','N:1'],['orders.customer_id','customers.customer_id','N:1'],['orders.shipping_address_id','addresses.address_id','N:1'],['order_items.order_id','orders.order_id','N:1'],['order_items.product_id','products.product_id','N:1'],['products.seller_id','sellers.seller_id','N:1'],['shipments.order_id','orders.order_id','1:1']],
+  joins:[
+    {type:'LEFT',ask:'List every product with its third-party seller. Products Amazon sells itself (no seller) must still appear.',left:['products','p'],right:['sellers','s'],on:['seller_id','seller_id'],select:['p.product_name','s.seller_name'],lo:'products Amazon sells itself',ro:'sellers with nothing listed'},
+    {type:'INNER',ask:'Show only the orders that shipped to an address, with the destination city and state.',left:['orders','o'],right:['addresses','a'],on:['shipping_address_id','address_id'],select:['o.order_id','a.city','a.state'],lo:'digital orders with no address',ro:'addresses never shipped to'},
+    {type:'FULL',ask:'For a marketplace audit, list all sellers and all products together. Keep sellers with nothing listed and products with no seller.',left:['sellers','s'],right:['products','p'],on:['seller_id','seller_id'],select:['s.seller_name','p.product_name'],lo:'sellers with nothing listed',ro:'products with no seller'},
+    {type:'RIGHT',ask:'List every saved address and any orders shipped there. Addresses that were never used must still appear.',left:['orders','o'],right:['addresses','a'],on:['shipping_address_id','address_id'],select:['a.street','a.city','o.order_id'],lo:'digital orders with no address',ro:'addresses never shipped to'}
+  ]
+},
+{
+  id:'airbnb', name:'Airbnb', domain:'Vacation stays', icon:'house', tint:'#c4485e',
+  blurb:'Hosts list places, guests book stays, and every stay can earn one review.',
+  layout:[['hosts','neighborhoods'],['listings'],['bookings','reviews'],['guests','coupons']],
+  tables:{
+    hosts:{one:'host',many:'hosts',label:'{full_name}',desc:'People who rent out their places.',
+      cols:[['host_id','INT','pk'],['full_name','VARCHAR(80)',''],['is_superhost','BOOLEAN',''],['response_rate','TINYINT','null','Percent of messages answered within a day.'],['hosting_since','DATE','']],
+      rows:[[21,'Elena Rossi',true,98,'2017-06-01'],[22,'Mike Chen',false,90,'2021-02-15'],[23,'Aisha Bello',true,100,'2019-09-10'],[24,'Tom Walsh',false,null,'2026-08-20']]},
+    neighborhoods:{one:'neighborhood',many:'neighborhoods',label:'{name}',desc:'Named city neighborhoods.',
+      cols:[['neighborhood_id','INT','pk'],['name','VARCHAR(60)',''],['city','VARCHAR(40)',''],['state','CHAR(2)','']],
+      rows:[[1,'South Beach','Miami','FL'],[2,'French Quarter','New Orleans','LA'],[3,'Capitol Hill','Seattle','WA'],[4,'SoHo','New York','NY']]},
+    listings:{one:'listing',many:'listings',label:'{title}',desc:'Places guests can book.',
+      cols:[['listing_id','INT','pk'],['host_id','INT','fk','The host who runs this listing.'],['neighborhood_id','INT','fk null','Empty for rural stays outside any named neighborhood.'],['title','VARCHAR(100)',''],['nightly_rate','DECIMAL(7,2)',''],['max_guests','TINYINT','']],
+      rows:[[401,21,1,'Ocean-view studio',189.00,2],[402,21,2,'Balcony loft near Bourbon St',225.00,4],[403,22,3,'Craftsman bungalow',140.00,3],[404,23,null,'Lakeside A-frame cabin',210.00,6],[405,23,null,'Desert dome under the stars',165.00,2],[406,22,3,'2BR with skyline view',260.00,5]]},
+    guests:{one:'guest',many:'guests',label:'{full_name}',desc:'Travelers who book stays.',
+      cols:[['guest_id','INT','pk'],['full_name','VARCHAR(80)',''],['email','VARCHAR(120)','uq'],['home_country','CHAR(2)','']],
+      rows:[[31,'Brian Foster','brian.foster@mail.com','US'],[32,'Nina Petrova','nina.petrova@mail.com','US'],[33,'Carlos Mendes','carlos.mendes@mail.com','BR'],[34,'Jade Wu','jade.wu@mail.com','CA'],[35,'Owen Reilly','owen.reilly@mail.com','IE']]},
+    bookings:{one:'booking',many:'bookings',label:'booking {booking_id}',desc:'One row per reserved stay.',
+      cols:[['booking_id','INT','pk'],['listing_id','INT','fk','The place that was booked.'],['guest_id','INT','fk','The guest who booked.'],['coupon_id','INT','fk null','Coupon applied at checkout. Empty when none was used.'],['check_in','DATE',''],['check_out','DATE',''],['total_price','DECIMAL(9,2)','']],
+      rows:[[8001,401,31,61,'2026-08-14','2026-08-17',527.00],[8002,403,32,null,'2026-08-20','2026-08-22',280.00],[8003,404,33,null,'2026-09-01','2026-09-05',840.00],[8004,402,34,62,'2026-09-12','2026-09-14',425.00],[8005,406,31,null,'2026-09-25','2026-09-28',780.00],[8006,401,32,null,'2026-10-02','2026-10-04',378.00]]},
+    reviews:{one:'review',many:'reviews',label:'review {review_id}',desc:'What guests said after a stay.',
+      cols:[['review_id','INT','pk'],['booking_id','INT','fk uq','The stay being reviewed. UNIQUE, so each stay gets one review at most.'],['stars','TINYINT',''],['comment','VARCHAR(500)','null']],
+      rows:[[901,8001,5,'Gorgeous view, spotless.'],[902,8002,4,'Great location, small kitchen.'],[903,8003,5,'Peaceful cabin weekend.'],[904,8005,5,'Exactly like the photos.']]},
+    coupons:{one:'coupon',many:'coupons',label:'{code}',desc:'Discount codes for stays.',
+      cols:[['coupon_id','INT','pk'],['code','VARCHAR(16)','uq'],['amount_off','DECIMAL(6,2)',''],['expires_on','DATE','']],
+      rows:[[61,'WELCOME40',40.00,'2026-12-31'],[62,'FALLSTAY',25.00,'2026-11-30'],[63,'WINTER50',50.00,'2027-02-28']]}
+  },
+  rels:[['listings.host_id','hosts.host_id','N:1'],['listings.neighborhood_id','neighborhoods.neighborhood_id','N:1'],['bookings.listing_id','listings.listing_id','N:1'],['bookings.guest_id','guests.guest_id','N:1'],['bookings.coupon_id','coupons.coupon_id','N:1'],['reviews.booking_id','bookings.booking_id','1:1']],
+  joins:[
+    {type:'FULL',ask:'For a map check, list every neighborhood and every listing together. Keep neighborhoods with no listings and listings outside any neighborhood.',left:['neighborhoods','n'],right:['listings','l'],on:['neighborhood_id','neighborhood_id'],select:['n.name','l.title'],lo:'neighborhoods with no listings',ro:'listings outside a neighborhood'},
+    {type:'LEFT',ask:'List every booking and the coupon used, if any. Bookings without a coupon must still appear.',left:['bookings','b'],right:['coupons','c'],on:['coupon_id','coupon_id'],select:['b.booking_id','c.code','c.amount_off'],lo:'bookings with no coupon',ro:'coupons nobody used'},
+    {type:'INNER',ask:'Show only the listings inside a named neighborhood, with the neighborhood and city.',left:['listings','l'],right:['neighborhoods','n'],on:['neighborhood_id','neighborhood_id'],select:['l.title','n.name','n.city'],lo:'listings outside a neighborhood',ro:'neighborhoods with no listings'},
+    {type:'RIGHT',ask:'List every coupon and the bookings that used it. Unused coupons must still appear.',left:['bookings','b'],right:['coupons','c'],on:['coupon_id','coupon_id'],select:['c.code','b.booking_id','b.total_price'],lo:'bookings with no coupon',ro:'coupons nobody used'}
+  ]
+},
+{
+  id:'spotify', name:'Spotify', domain:'Music streaming', icon:'wave', tint:'#24875a',
+  blurb:'Users build playlists, playlists hold tracks, and tracks belong to artists.',
+  layout:[['users','playlists'],['playlist_tracks','lyrics'],['tracks','artists']],
+  tables:{
+    users:{one:'user',many:'users',label:'{display_name}',desc:'Listener accounts.',
+      cols:[['user_id','INT','pk'],['display_name','VARCHAR(40)',''],['email','VARCHAR(120)','uq'],['plan','VARCHAR(10)',''],['country','CHAR(2)','']],
+      rows:[[1,'jaylen.m','jaylen.m@mail.com','premium','US'],[2,'sara_beats','sara.beats@mail.com','free','US'],[3,'mike.t','mike.t@mail.com','premium','US'],[4,'ana.lima','ana.lima@mail.com','student','US']]},
+    playlists:{one:'playlist',many:'playlists',label:'{playlist_name}',desc:'Named lists of tracks.',
+      cols:[['playlist_id','INT','pk'],['owner_user_id','INT','fk null','The user who made the playlist. Empty for playlists made by Spotify\'s editors.'],['playlist_name','VARCHAR(100)',''],['is_public','BOOLEAN','']],
+      rows:[[201,1,'Road Trip 2026',true],[202,2,'Study Focus',false],[203,null,'Today\'s Top Hits',true],[204,3,'Gym Mix',true],[205,null,'Chill Acoustic',true]]},
+    playlist_tracks:{one:'playlist entry',many:'playlist entries',label:'entry {playlist_id}/{track_id}',desc:'Bridge table. Which tracks sit on which playlists.',
+      cols:[['playlist_id','INT','pk fk','Part of the composite primary key. The same playlist appears on many rows here.'],['track_id','INT','pk fk','Part of the composite primary key. The same track can sit on many playlists.'],['added_on','DATE','']],
+      rows:[[201,101,'2026-06-01'],[201,105,'2026-06-01'],[202,103,'2026-05-12'],[202,106,'2026-05-12'],[203,101,'2026-09-01'],[203,104,'2026-09-01'],[204,104,'2026-07-20'],[205,103,'2026-08-03']]},
+    tracks:{one:'track',many:'tracks',label:'{title}',desc:'Songs you can play.',
+      cols:[['track_id','INT','pk'],['artist_id','INT','fk','The artist who recorded the track.'],['title','VARCHAR(120)',''],['duration_sec','SMALLINT',''],['is_explicit','BOOLEAN','']],
+      rows:[[101,11,'Golden Hour Drive',203,false],[102,11,'Paper Hearts',188,false],[103,12,'Streetlights',241,false],[104,13,'Fuego Lento',215,false],[105,14,'Dust on the Dashboard',232,false],[106,12,'Interlude (Instrumental)',96,false]]},
+    artists:{one:'artist',many:'artists',label:'{artist_name}',desc:'Musicians and bands.',
+      cols:[['artist_id','INT','pk'],['artist_name','VARCHAR(80)',''],['genre','VARCHAR(30)',''],['monthly_listeners','INT','']],
+      rows:[[11,'Nova Lane','Pop',4200000],[12,'The Midnight Owls','Indie',1150000],[13,'Rico Vega','Latin',2800000],[14,'Harper Grey','Country',960000],[15,'Static Bloom','Electronic',310000]]},
+    lyrics:{one:'lyrics file',many:'lyrics files',label:'lyrics file {lyrics_id}',desc:'Synced lyrics shown while a track plays.',
+      cols:[['lyrics_id','INT','pk'],['track_id','INT','fk uq null','The track these lyrics belong to. UNIQUE, so a track has one lyrics file. Empty when an upload hasn\'t been matched to a track yet.'],['language','CHAR(2)',''],['line_count','SMALLINT','']],
+      rows:[[601,101,'en',42],[602,102,'en',38],[603,104,'es',51],[604,105,'en',47],[605,null,'en',35]]}
+  },
+  rels:[['playlists.owner_user_id','users.user_id','N:1'],['playlist_tracks.playlist_id','playlists.playlist_id','N:1'],['playlist_tracks.track_id','tracks.track_id','N:1'],['tracks.artist_id','artists.artist_id','N:1'],['lyrics.track_id','tracks.track_id','1:1']],
+  joins:[
+    {type:'LEFT',ask:'List every user and the playlists they made. Users who haven\'t made a playlist must still appear.',left:['users','u'],right:['playlists','p'],on:['user_id','owner_user_id'],select:['u.display_name','p.playlist_name'],lo:'users with no playlists',ro:'editor playlists with no user'},
+    {type:'RIGHT',ask:'List every track with its lyrics. Tracks without lyrics, like instrumentals, must still appear.',left:['lyrics','ly'],right:['tracks','t'],on:['track_id','track_id'],select:['t.title','ly.language','ly.line_count'],lo:'lyrics files not matched to a track',ro:'tracks with no lyrics'},
+    {type:'INNER',ask:'Show only the playlists made by a user, with the user\'s name. Skip playlists made by Spotify\'s editors.',left:['playlists','p'],right:['users','u'],on:['owner_user_id','user_id'],select:['p.playlist_name','u.display_name'],lo:'editor playlists with no user',ro:'users with no playlists'},
+    {type:'FULL',ask:'For a lyrics cleanup, list every track and every lyrics file together. Keep tracks with no lyrics and lyrics files not matched to a track.',left:['tracks','t'],right:['lyrics','ly'],on:['track_id','track_id'],select:['t.title','ly.lyrics_id','ly.language'],lo:'tracks with no lyrics',ro:'lyrics files not matched to a track'}
+  ]
+},
+{
+  id:'starbucks', name:'Starbucks', domain:'Coffee and rewards', icon:'cup', tint:'#2b6e57',
+  blurb:'Rewards members and guests order drinks at stores, and members register cards.',
+  layout:[['cards','customers'],['orders','stores'],['order_items','products']],
+  tables:{
+    customers:{one:'member',many:'members',label:'{full_name}',desc:'Rewards members.',
+      cols:[['customer_id','INT','pk'],['full_name','VARCHAR(80)',''],['email','VARCHAR(120)','uq'],['stars_balance','INT',''],['member_since','DATE','']],
+      rows:[[1,'Chris Morgan','chris.morgan@mail.com',245,'2020-04-18'],[2,'Alyssa Reed','alyssa.reed@mail.com',80,'2022-10-03'],[3,'Jamal Washington','jamal.w@mail.com',410,'2019-01-27'],[4,'Lily Tran','lily.tran@mail.com',0,'2026-09-30'],[5,'Robert Hayes','robert.hayes@mail.com',120,'2023-07-14']]},
+    cards:{one:'card',many:'cards',label:'card {card_id}',desc:'Prepaid store cards.',
+      cols:[['card_id','INT','pk'],['customer_id','INT','fk uq null','Who registered this card. UNIQUE, so each member registers one card here. Empty for gift cards nobody registered.'],['card_number','CHAR(16)','uq'],['balance','DECIMAL(6,2)','']],
+      rows:[[71,1,'6100123412341234',18.50],[72,3,'6100567856785678',42.75],[73,null,'6100999900001111',25.00],[74,5,'6100246813571357',5.20]]},
+    stores:{one:'store',many:'stores',label:'{store_name}',desc:'Cafe locations.',
+      cols:[['store_id','INT','pk'],['store_name','VARCHAR(60)',''],['city','VARCHAR(40)',''],['state','CHAR(2)',''],['has_drive_thru','BOOLEAN','']],
+      rows:[[1,'Pike Place','Seattle','WA',false],[2,'Michigan Ave','Chicago','IL',false],[3,'Sunset Blvd','Los Angeles','CA',true],[4,'Congress Ave','Austin','TX',true]]},
+    orders:{one:'order',many:'orders',label:'order {order_id}',desc:'One row per purchase.',
+      cols:[['order_id','INT','pk'],['customer_id','INT','fk null','The Rewards member who ordered. Empty for guests who paid without signing in.'],['store_id','INT','fk','The store that made the order.'],['ordered_at','DATETIME',''],['channel','VARCHAR(12)',''],['total','DECIMAL(7,2)','']],
+      rows:[[4001,1,1,'2026-10-01 07:42','mobile',9.90],[4002,null,2,'2026-10-01 08:05','in_store',5.25],[4003,3,3,'2026-10-02 15:20','drive_thru',9.40],[4004,2,4,'2026-10-03 09:10','mobile',4.65],[4005,null,3,'2026-10-03 12:45','drive_thru',4.95],[4006,3,1,'2026-10-04 06:58','in_store',11.20]]},
+    order_items:{one:'order line',many:'order lines',label:'line {order_item_id}',desc:'Each drink or food item in an order.',
+      cols:[['order_item_id','INT','pk'],['order_id','INT','fk','The order this line belongs to.'],['product_id','INT','fk','The menu item.'],['quantity','TINYINT',''],['unit_price','DECIMAL(5,2)','']],
+      rows:[[1,4001,11,2,4.95],[2,4002,13,1,5.25],[3,4003,12,1,5.95],[4,4003,14,1,3.45],[5,4004,15,1,4.65],[6,4005,11,1,4.95],[7,4006,13,1,5.25],[8,4006,12,1,5.95]]},
+    products:{one:'menu item',many:'menu items',label:'{product_name}',desc:'Drinks and food on the menu.',
+      cols:[['product_id','INT','pk'],['product_name','VARCHAR(60)',''],['category','VARCHAR(20)',''],['size','VARCHAR(8)','null','Empty for food, which has no cup size.'],['price','DECIMAL(5,2)','']],
+      rows:[[11,'Caffè Latte','Espresso','Grande',4.95],[12,'Pumpkin Spice Latte','Espresso','Grande',5.95],[13,'Cold Brew','Cold Coffee','Venti',5.25],[14,'Butter Croissant','Bakery',null,3.45],[15,'Matcha Latte','Tea','Tall',4.65]]}
+  },
+  rels:[['cards.customer_id','customers.customer_id','1:1'],['orders.customer_id','customers.customer_id','N:1'],['orders.store_id','stores.store_id','N:1'],['order_items.order_id','orders.order_id','N:1'],['order_items.product_id','products.product_id','N:1']],
+  joins:[
+    {type:'INNER',ask:'Show only the orders placed by a signed-in Rewards member, with the member\'s name.',left:['orders','o'],right:['customers','c'],on:['customer_id','customer_id'],select:['o.order_id','c.full_name','o.total'],lo:'guest orders with no member',ro:'members with no orders'},
+    {type:'FULL',ask:'For a card audit, list every member and every card together. Keep members with no card and cards nobody registered.',left:['customers','c'],right:['cards','k'],on:['customer_id','customer_id'],select:['c.full_name','k.card_id','k.balance'],lo:'members with no card',ro:'cards nobody registered'},
+    {type:'LEFT',ask:'List every member and their orders. Members who haven\'t ordered yet must still appear.',left:['customers','c'],right:['orders','o'],on:['customer_id','customer_id'],select:['c.full_name','o.order_id','o.channel'],lo:'members with no orders',ro:'guest orders with no member'},
+    {type:'RIGHT',ask:'List every card and who registered it. Cards nobody registered must still appear.',left:['customers','c'],right:['cards','k'],on:['customer_id','customer_id'],select:['k.card_id','k.balance','c.full_name'],lo:'members with no card',ro:'cards nobody registered'}
+  ]
+}
+];
+
+(function(){
+'use strict';
+
+/* ---------- small helpers ---------- */
+const $=(s,r=document)=>r.querySelector(s);
+const $$=(s,r=document)=>Array.from(r.querySelectorAll(s));
+const esc=v=>String(v).replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+const frag=html=>{const t=document.createElement('template');t.innerHTML=html.trim();return t.content.firstElementChild;};
+const clamp=(v,a,b)=>Math.max(a,Math.min(b,v));
+const RM=()=>matchMedia('(prefers-reduced-motion: reduce)').matches;
+const plural=(n,one,many)=>n===1?one:many;
+
+const PATHS={
+  back:'<path d="M15 18l-6-6 6-6"/>',
+  plus:'<path d="M12 5v14M5 12h14"/>',
+  minus:'<path d="M5 12h14"/>',
+  fit:'<path d="M4 9V4h5M20 9V4h-5M4 15v5h5M20 15v5h-5"/>',
+  tidy:'<rect x="3.5" y="4" width="7" height="6" rx="1.5"/><rect x="13.5" y="4" width="7" height="6" rx="1.5"/><rect x="3.5" y="14" width="7" height="6" rx="1.5"/><rect x="13.5" y="14" width="7" height="6" rx="1.5"/>',
+  hint:'<path d="M9 18h6M10 21h4"/><path d="M12 3a6 6 0 0 0-3.6 10.8c.6.5 1 1.2 1.1 2V16h5v-.2c.1-.8.5-1.5 1.1-2A6 6 0 0 0 12 3z"/>',
+  guide:'<path d="M4 4.5A1.5 1.5 0 0 1 5.5 3H20v16H5.5A1.5 1.5 0 0 0 4 20.5z"/><path d="M4 20.5A1.5 1.5 0 0 0 5.5 22H20"/>',
+  reset:'<path d="M3 12a9 9 0 1 0 3-6.7"/><path d="M3 4v5h5"/>',
+  sun:'<circle cx="12" cy="12" r="4"/><path d="M12 2v2M12 20v2M4.9 4.9l1.4 1.4M17.7 17.7l1.4 1.4M2 12h2M20 12h2M4.9 19.1l1.4-1.4M17.7 6.3l1.4-1.4"/>',
+  moon:'<path d="M20 14.5A8 8 0 0 1 9.5 4a8 8 0 1 0 10.5 10.5z"/>',
+  key:'<circle cx="8" cy="15" r="4"/><path d="M10.8 12.2L19 4M15.5 7.5l2.5 2.5M13.5 9.5l2 2"/>',
+  link:'<path d="M10 13.5a4 4 0 0 0 5.66.34l3-3a4 4 0 0 0-5.66-5.66l-1.2 1.2"/><path d="M14 10.5a4 4 0 0 0-5.66-.34l-3 3a4 4 0 0 0 5.66 5.66l1.2-1.2"/>',
+  grid:'<rect x="3" y="4" width="18" height="16" rx="2"/><path d="M3 9.5h18M3 14.8h18M9.5 9.5V20"/>',
+  table:'<rect x="3" y="4" width="18" height="16" rx="2.5"/><path d="M3 10h18M10 10v10"/>',
+  check:'<path d="M5 12.5l4.5 4.5L19 7.5"/>',
+  x:'<path d="M6 6l12 12M18 6L6 18"/>',
+  alert:'<circle cx="12" cy="12" r="9"/><path d="M12 7.5v5.5M12 16.5v.01"/>',
+  info:'<circle cx="12" cy="12" r="9"/><path d="M12 11v5.5M12 7.5v.01"/>',
+  arrow:'<path d="M5 12h14M13 6l6 6-6 6"/>',
+  lock:'<rect x="5" y="11" width="14" height="10" rx="2"/><path d="M8 11V8a4 4 0 0 1 8 0v3"/>',
+  copy:'<rect x="8" y="8" width="13" height="13" rx="2"/><path d="M16 8V5a2 2 0 0 0-2-2H5a2 2 0 0 0-2 2v9a2 2 0 0 0 2 2h3"/>',
+  cert:'<circle cx="12" cy="9" r="6"/><path d="M8.5 13.8L7 22l5-3 5 3-1.5-8.2"/>',
+  clock:'<circle cx="12" cy="12" r="9"/><path d="M12 7v5l3 2"/>',
+  trash:'<path d="M4 7h16M10 11v6M14 11v6M6 7l1 13h10l1-13M9 7V4h6v3"/>',
+  car:'<path d="M3 13l2.1-5.1A2.4 2.4 0 0 1 7.3 6.5h9.4a2.4 2.4 0 0 1 2.2 1.4L21 13v4H3z"/><path d="M3 13h18"/><circle cx="7.5" cy="17" r="1.8"/><circle cx="16.5" cy="17" r="1.8"/>',
+  bag:'<path d="M5.5 8h13l-1.2 12.5H6.7z"/><path d="M9 8V6.5a3 3 0 0 1 6 0V8"/>',
+  play:'<rect x="3" y="4.5" width="18" height="13" rx="2.5"/><path d="M10.2 8.3l4.6 2.7-4.6 2.7z"/><path d="M8 21h8"/>',
+  box:'<path d="M3.5 7.5L12 3.2l8.5 4.3v9L12 20.8l-8.5-4.3z"/><path d="M3.5 7.5L12 11.8l8.5-4.3M12 11.8v9"/>',
+  house:'<path d="M3.5 11L12 4l8.5 7"/><path d="M5.5 9.5V20h13V9.5"/><path d="M10 20v-5.5h4V20"/>',
+  wave:'<path d="M4 10v4M8 7v10M12 4v16M16 8v8M20 10.5v3"/>',
+  cup:'<path d="M5 8.5h11.5v5.5a5 5 0 0 1-5 5h-1.5a5 5 0 0 1-5-5z"/><path d="M16.5 10h1.3a2.6 2.6 0 0 1 0 5.2h-1.3"/><path d="M8.5 3.5c0 1.6 1.2 1.6 1.2 3.2M12.3 3.5c0 1.6 1.2 1.6 1.2 3.2"/>'
+};
+const ic=(n,c='')=>`<svg class="ic ${c}" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">${PATHS[n]}</svg>`;
+
+/* ---------- prepare data ---------- */
+DBS.forEach((db,di)=>{
+  db.index=di;
+  db.tableList=db.layout.flat().map((id,i)=>{
+    const t=db.tables[id];
+    t.id=id; t.hueIdx=i%7; t.hue=`var(--h${t.hueIdx+1})`;
+    t.colList=t.cols.map((c,ci)=>{const f=(c[2]||'').split(/\s+/).filter(Boolean);return {t:id,name:c[0],type:c[1],base:c[1].split('(')[0],pk:f.includes('pk'),fk:f.includes('fk'),uq:f.includes('uq'),nullable:f.includes('null'),desc:c[3]||'',idx:ci};});
+    t.colMap=Object.fromEntries(t.colList.map(c=>[c.name,c]));
+    t.composite=t.colList.filter(c=>c.pk).length>1;
+    return t;
+  });
+  db.relList=db.rels.map(([a,b,card],i)=>{const [ft,fc]=a.split('.'),[pt,pc]=b.split('.');return {i,fk:{t:ft,c:fc},pk:{t:pt,c:pc},card};});
+  db.relList.forEach(r=>{db.tables[r.fk.t].colMap[r.fk.c].ref=r;});
+});
+const DB_BY_ID=Object.fromEntries(DBS.map(d=>[d.id,d]));
+
+const CARDS=['1:1','1:N','N:1','N:N'];
+const CARD_INFO={'1:1':{mk:'1 : 1',name:'One to one'},'1:N':{mk:'1 : *',name:'One to many'},'N:1':{mk:'* : 1',name:'Many to one'},'N:N':{mk:'* : *',name:'Many to many'}};
+const flip=c=>c==='1:N'?'N:1':c==='N:1'?'1:N':c;
+const ends=c=>c.split(':').map(x=>x==='1'?'1':'*');
+const KEEP={INNER:[0,0],LEFT:[1,0],RIGHT:[0,1],FULL:[1,1]};
+const JTYPES=['INNER','LEFT','RIGHT','FULL'];
+const JNAME={INNER:'INNER',LEFT:'LEFT',RIGHT:'RIGHT',FULL:'FULL OUTER'};
+
+const Tb=(db,id)=>db.tables[id];
+const Col=(db,r)=>db.tables[r.t].colMap[r.c];
+const same=(x,y)=>!!(x&&y&&x.t===y.t&&x.c===y.c);
+const qn=r=>`${r.t}.${r.c}`;
+
+function cardSentence(card,A,B){
+  switch(card){
+    case '1:1': return `Each ${A.one} matches at most one ${B.one}, and each ${B.one} at most one ${A.one}.`;
+    case '1:N': return `One ${A.one} can have many ${B.many}.`;
+    case 'N:1': return `Many ${A.many} can point to the same ${B.one}.`;
+    default: return `Many ${A.many} can match many ${B.many}.`;
+  }
+}
+function findRel(db,a,b){return db.relList.find(r=>(same(r.fk,a)&&same(r.pk,b))||(same(r.fk,b)&&same(r.pk,a)));}
+function cardReason(db,rel,norm){
+  const F=qn(rel.fk),P=qn(rel.pk),FT=Tb(db,rel.fk.t),PT=Tb(db,rel.pk.t),fc=Col(db,rel.fk);
+  if(rel.card==='1:1') return `Right columns, wrong cardinality. ${F} is marked UQ (unique), so each ${PT.one} matches at most one ${FT.one}. That makes it one to one.`;
+  if(norm==='1:N') return `Right columns, but the sides are swapped. ${P} is the primary key, so ${rel.pk.t} is the one side (1). ${F} repeats, so ${rel.fk.t} is the many side (*).`;
+  if(norm==='1:1') return fc.pk
+    ? `Right columns, wrong cardinality. ${rel.fk.c} is only part of the composite key in ${rel.fk.t}, so on its own it repeats. Many ${FT.many} can point to one ${PT.one}.`
+    : `Right columns, wrong cardinality. ${F} isn't unique, so many ${FT.many} can point to the same ${PT.one}.`;
+  return `Right columns, wrong cardinality. ${P} is a primary key, so each value appears only once on that side. That side is one (1), not many.`;
+}
+function pairReason(db,ca,cb){
+  const A=`${ca.t}.${ca.name}`,B=`${cb.t}.${cb.name}`;
+  if(ca.base!==cb.base) return `The data types don't match. ${A} is ${ca.type} and ${B} is ${cb.type}. Related columns must hold the same kind of value.`;
+  if(!ca.pk&&!ca.fk&&!cb.pk&&!cb.fk) return `Neither column is a key. A relationship connects a foreign key (FK) to the primary key (PK) it points to.`;
+  if(ca.fk&&cb.fk&&ca.ref&&cb.ref&&same(ca.ref.pk,cb.ref.pk)) return `Both columns are foreign keys that point to ${ca.ref.pk.t}. Connect each one to ${qn(ca.ref.pk)} instead.`;
+  const fk=ca.fk&&ca.ref?ca:cb.fk&&cb.ref?cb:null;
+  if(fk){
+    const other=fk===ca?cb:ca;
+    if(other.t===fk.ref.pk.t) return `Right table, wrong column. ${fk.t}.${fk.name} points to the primary key of ${other.t}, which is ${fk.ref.pk.c}.`;
+    return `${fk.t}.${fk.name} is a foreign key, but it doesn't point to ${other.t}. Find the table whose primary key holds the same values.`;
+  }
+  if(ca.pk&&cb.pk) return `Both are primary keys of different tables. A relationship links a foreign key in one table to the primary key of another.`;
+  const nk=(!ca.pk&&!ca.fk)?ca:cb;
+  return `${nk.t}.${nk.name} isn't a key column. Start from a column marked FK and drop it on the primary key it points to.`;
+}
+function gradeLink(db,L){
+  const rel=findRel(db,L.a,L.b);
+  if(rel){const norm=same(rel.fk,L.a)?L.card:flip(L.card); if(norm===rel.card) return {ok:true,rel,reason:''}; return {ok:false,rel,reason:cardReason(db,rel,norm)};}
+  return {ok:false,rel:null,reason:pairReason(db,Col(db,L.a),Col(db,L.b))};
+}
+function okText(db,rel){
+  const F=qn(rel.fk),P=qn(rel.pk),FT=Tb(db,rel.fk.t),PT=Tb(db,rel.pk.t);
+  return rel.card==='1:1'
+    ? `Each ${PT.one} has at most one ${FT.one}, because ${F} is unique.`
+    : `Many ${FT.many} can point to the same ${PT.one}. ${P} is unique and ${F} repeats.`;
+}
+function progressOf(db,p){
+  const links=(p&&p.links)||[];
+  const g=links.map(l=>gradeLink(db,l));
+  const ok=new Set(g.filter(x=>x.ok).map(x=>x.rel.i)).size, bad=g.filter(x=>!x.ok).length;
+  const jok=db.joins.filter((q,i)=>p&&p.joins&&p.joins[i]&&p.joins[i].done).length;
+  return {ok,bad,jok,pct:Math.floor((ok+jok)/(db.relList.length+db.joins.length)*100)};
+}
+function typeText(type){
+  const m=type.match(/^(\w+)(?:\((\d+)(?:,(\d+))?\))?/)||[];const b=m[1],n=m[2],s=m[3];
+  switch(b){
+    case 'INT': return 'INT is a whole number up to about 2.1 billion.';
+    case 'SMALLINT': return 'SMALLINT is a whole number up to 32,767.';
+    case 'TINYINT': return 'TINYINT is a very small whole number, like a rating or a seat count.';
+    case 'DECIMAL': return `DECIMAL(${n},${s}) is an exact number with up to ${n} digits, ${s} of them after the decimal point.`;
+    case 'VARCHAR': return `VARCHAR(${n}) is text up to ${n} characters long.`;
+    case 'CHAR': return `CHAR(${n}) is text of exactly ${n} characters.`;
+    case 'DATE': return 'DATE is a calendar date, like 2026-09-01.';
+    case 'DATETIME': return 'DATETIME is a date and time, like 2026-09-01 08:15.';
+    case 'BOOLEAN': return 'BOOLEAN is true or false.';
+    default: return type;
+  }
+}
+function fmtCell(col,v){
+  if(v===null||v===undefined) return '<span class="null">NULL</span>';
+  if(col.base==='DECIMAL'&&typeof v==='number'){const s=+(col.type.match(/,(\d+)/)||[0,2])[1];return v.toFixed(s);}
+  if(col.base==='BOOLEAN') return v?'true':'false';
+  return esc(v);
+}
+function rowLabel(t,row){return t.label.replace(/\{(\w+)\}/g,(m,c)=>{const v=row[t.colMap[c].idx];return v===null?'NULL':String(v);});}
+function namesOf(t,rows){const n=rows.map(r=>rowLabel(t,r));if(n.length<=3) return listJoin(n);return `${n.slice(0,2).join(', ')} and ${n.length-2} more`;}
+function listJoin(a){return a.length<2?a.join(''):a.length===2?`${a[0]} and ${a[1]}`:`${a.slice(0,-1).join(', ')} and ${a[a.length-1]}`;}
+function fmtDur(s){s=Math.max(0,Math.round(s));const h=Math.floor(s/3600),m=Math.floor(s%3600/60),r=s%60;return h?`${h}h ${m}m`:`${m}m ${String(r).padStart(2,'0')}s`;}
+function fmtClock(s){const m=Math.floor(s/60),r=s%60;return `${m}:${String(r).padStart(2,'0')}`;}
+function fmtDate(ms){return new Date(ms).toLocaleString('en-US',{month:'short',day:'numeric',year:'numeric',hour:'numeric',minute:'2-digit'});}
+
+/* ---------- storage ---------- */
+const STORE_KEY='sql-join-studio:v1';
+let store={name:'',theme:'',coachSeen:false,progress:{}};
+try{const raw=localStorage.getItem(STORE_KEY);if(raw) store=Object.assign(store,JSON.parse(raw)||{});}catch(e){}
+if(!store.progress||typeof store.progress!=='object') store.progress={};
+function save(){try{localStorage.setItem(STORE_KEY,JSON.stringify(store));}catch(e){}}
+
+/* ---------- theme ---------- */
+const root=document.documentElement;
+if(store.theme==='dark'||store.theme==='light') root.dataset.theme=store.theme;
+const isDark=()=>root.dataset.theme?root.dataset.theme==='dark':matchMedia('(prefers-color-scheme: dark)').matches;
+let COL={};
+function refreshColors(){
+  const cs=getComputedStyle(root);const g=n=>cs.getPropertyValue(n).trim();
+  COL={ok:g('--ok'),bad:g('--bad'),accent:g('--accent'),ink:g('--ink'),ink3:g('--ink-3'),surface:g('--surface'),line:g('--line-2'),pk:g('--pk'),fk:g('--fk'),uq:g('--uq'),right:g('--right'),h:[1,2,3,4,5,6,7].map(i=>g('--h'+i))};
+}
+function paintThemeButtons(){$$('.theme-btn').forEach(b=>{b.innerHTML=ic(isDark()?'sun':'moon');b.title=isDark()?'Switch to light theme':'Switch to dark theme';});}
+function toggleTheme(){root.dataset.theme=isDark()?'light':'dark';store.theme=root.dataset.theme;save();refreshColors();paintThemeButtons();if(S) drawMinimap();}
+matchMedia('(prefers-color-scheme: dark)').addEventListener('change',()=>{refreshColors();paintThemeButtons();if(S) drawMinimap();});
+
+/* ---------- toasts, live region ---------- */
+function live(msg){const l=$('#live');l.textContent='';setTimeout(()=>{l.textContent=msg;},30);}
+function toast(msg,kind='',ms=3400){
+  const box=$('#toasts');
+  const el=frag(`<div class="toast ${kind}">${ic(kind==='ok'?'check':kind==='bad'?'alert':'info')}<span>${esc(msg)}</span></div>`);
+  box.appendChild(el);while(box.children.length>2) box.firstElementChild.remove();
+  setTimeout(()=>{el.classList.add('out');setTimeout(()=>el.remove(),300);},ms);
+  live(msg);
+}
+
+/* ---------- venn ---------- */
+let vennSeq=0;
+function venn(type,o={}){
+  const id='vn'+(++vennSeq);const [kl,kr]=type?KEEP[type]:[0,0];
+  const H=o.mini?106:132;const cl='cx="75" cy="53" r="44"',cr='cx="125" cy="53" r="44"';
+  let s=`<svg viewBox="0 0 200 ${H}" aria-hidden="true"><defs><clipPath id="${id}c"><circle ${cl}/></clipPath><mask id="${id}a"><rect width="200" height="${H}" fill="#fff"/><circle ${cr} fill="#000"/></mask><mask id="${id}b"><rect width="200" height="${H}" fill="#fff"/><circle ${cl} fill="#000"/></mask></defs>`;
+  s+=`<circle ${cl} mask="url(#${id}a)" class="vf${kl?' on':''}"/><circle ${cr} mask="url(#${id}b)" class="vf${kr?' on':''}"/><circle ${cr} clip-path="url(#${id}c)" class="vf${type?' on':''}"/>`;
+  s+=`<circle ${cl} class="vo L"/><circle ${cr} class="vo R"/>`;
+  if(o.counts){const [a,b,c]=o.counts;s+=`<text x="52" y="58" class="vc">${a}</text><text x="100" y="58" class="vc">${b}</text><text x="148" y="58" class="vc">${c}</text>`;}
+  if(o.labels){s+=`<text x="62" y="124" class="vl L">${esc(o.labels[0])}</text><text x="138" y="124" class="vl R">${esc(o.labels[1])}</text>`;}
+  return s+'</svg>';
+}
+
+/* ---------- modals ---------- */
+const modalStack=[];
+function openModal(inner,{cls='',wide=false,onClose}={}){
+  const prev=document.activeElement;
+  const sc=frag(`<div class="scrim ${cls}"><div class="modal${wide?' wide':''}" role="dialog" aria-modal="true"><button class="ibtn modal-x" data-x="close" aria-label="Close">${ic('x')}</button>${inner}</div></div>`);
+  document.body.appendChild(sc);
+  const m={el:sc,close(){sc.remove();const i=modalStack.indexOf(m);if(i>=0) modalStack.splice(i,1);if(onClose) onClose();if(prev&&prev.focus) try{prev.focus();}catch(e){}}};
+  sc.addEventListener('click',e=>{if(e.target===sc) m.close();const x=e.target.closest('[data-x="close"]');if(x) m.close();});
+  modalStack.push(m);
+  const f=sc.querySelector('.modal-f .btn.primary')||sc.querySelector('input')||sc.querySelector('.modal-x');
+  setTimeout(()=>f&&f.focus(),30);
+  return m;
+}
+function closeTopModal(){const m=modalStack[modalStack.length-1];if(m){m.close();return true;}const d=$('.drawer-scrim');if(d){d.remove();return true;}return false;}
+
+/* ---------- guide ---------- */
+function guideHTML(){
+  return `<div class="guide">
+  <h3>${ic('table')}Tables, rows and columns</h3>
+  <p>A table stores one kind of thing, like <code>rides</code> or <code>drivers</code>. Each row is one record. Each column holds one fact about it and has a fixed data type.</p>
+  <h3>${ic('info')}Data types and sizes</h3>
+  <table class="typetbl"><tbody>
+  <tr><td>INT</td><td>Whole number up to about 2.1 billion. Most IDs use it.</td></tr>
+  <tr><td>SMALLINT, TINYINT</td><td>Smaller whole numbers that take less space.</td></tr>
+  <tr><td>DECIMAL(8,2)</td><td>Exact number with up to 8 digits, 2 after the point. Good for money.</td></tr>
+  <tr><td>VARCHAR(80)</td><td>Text up to 80 characters.</td></tr>
+  <tr><td>CHAR(5)</td><td>Text of exactly 5 characters, like a ZIP code.</td></tr>
+  <tr><td>DATE, DATETIME</td><td>A calendar date, or a date with a time.</td></tr>
+  <tr><td>BOOLEAN</td><td>true or false.</td></tr>
+  </tbody></table>
+  <p style="margin-top:8px">Two columns can only be related when they hold the same type of value.</p>
+  <h3>${ic('key')}Keys and constraints</h3>
+  <ul>
+    <li><b class="fl pk">PK</b> Primary key. Unique and never empty, so it identifies each row. Two PK columns in one table form a composite key: the pair is unique, each column alone can repeat.</li>
+    <li><b class="fl fk">FK</b> Foreign key. Holds a value from another table's primary key. That is how tables point at each other.</li>
+    <li><b class="fl uq">UQ</b> Unique. No two rows can share a value.</li>
+    <li><i class="fl nul">null</i> The column can be empty (NULL). An empty foreign key means the row points at nothing.</li>
+  </ul>
+  <h3>${ic('link')}Cardinality</h3>
+  <ul>
+    <li><code>* : 1</code> Many to one. Many rides point to the same driver. This is the most common relationship. Read from the other side it is one to many, <code>1 : *</code>.</li>
+    <li><code>1 : 1</code> One to one. Each driver has at most one car on file. You can spot it because the foreign key is also UNIQUE.</li>
+    <li><code>* : *</code> Many to many. A playlist has many tracks and a track sits on many playlists. Databases store this with a bridge table, like <code>playlist_tracks</code>, which turns it into two many-to-one relationships.</li>
+  </ul>
+  <p style="margin-top:8px"><b>Quick rule:</b> the primary key side is always one (1). If the foreign key is UNIQUE, the other side is one too. If it can repeat, that side is many (*).</p>
+  <h3>${ic('table')}Joins</h3>
+  <div class="gvenn">
+    ${venn('INNER',{mini:true})}<div><b>INNER JOIN</b><p>Only rows that match on both sides.</p></div>
+    ${venn('LEFT',{mini:true})}<div><b>LEFT JOIN</b><p>Every row from the table before JOIN, plus matches. No match gives NULLs.</p></div>
+    ${venn('RIGHT',{mini:true})}<div><b>RIGHT JOIN</b><p>Every row from the table after JOIN, plus matches.</p></div>
+    ${venn('FULL',{mini:true})}<div><b>FULL OUTER JOIN</b><p>Every row from both tables, matched where possible.</p></div>
+  </div>
+  <p style="margin-top:8px">LEFT and RIGHT depend on the order you write the tables. <code>A LEFT JOIN B</code> returns the same rows as <code>B RIGHT JOIN A</code>.</p>
+  <h3>${ic('grid')}Same idea in Power BI</h3>
+  <p>Power BI's Model view shows the same picture: tables, key columns, and lines marked 1 and *. Dragging a column onto another table's column creates a relationship, and you pick its cardinality from the same list used here.</p>
+  <h3>${ic('cert')}How scoring works</h3>
+  <ul>
+    <li>Your percentage counts correct relationships plus solved join questions.</li>
+    <li>A wrong relationship stays red until you fix it or delete it. 100% needs zero red lines.</li>
+    <li>Wrong tries, hints and time all appear on your certificate.</li>
+  </ul>
+  <h3>${ic('arrow')}Controls</h3>
+  <ul>
+    <li>Drag a column onto a column in another table, or click one column and then the other.</li>
+    <li>Drag a table by its header. Drag empty space to pan. Scroll or pinch to zoom.</li>
+    <li>Keyboard: Tab to a column, press Enter, Tab to the other column, press Enter. Esc cancels. Press + or - to zoom and 0 to fit.</li>
+  </ul>
+  </div>`;
+}
+function openGuide(){
+  if($('.drawer-scrim')) return;
+  const sc=frag(`<div class="scrim drawer-scrim" style="background:transparent"><aside class="drawer" role="dialog" aria-label="Guide"><div class="drawer-h"><h2>Guide</h2><button class="ibtn" data-x="close" aria-label="Close guide">${ic('x')}</button></div><div class="drawer-b">${guideHTML()}</div></aside></div>`);
+  sc.addEventListener('click',e=>{if(e.target===sc||e.target.closest('[data-x="close"]')) sc.remove();});
+  document.body.appendChild(sc);
+  setTimeout(()=>{const b=sc.querySelector('[data-x="close"]');b&&b.focus();},30);
+}
+
+/* ---------- home ---------- */
+function relMini(kind){
+  const box=(x,w,n,hue)=>`<rect x="${x}" y="17" width="${w}" height="30" rx="6" class="rm-box"/><rect x="${x}" y="17" width="${w}" height="3" rx="1.5" style="fill:var(${hue})"/><text x="${x+w/2}" y="36" class="rm-t">${n}</text>`;
+  const chip=(x,t)=>`<circle cx="${x}" cy="32" r="7" class="rm-chip"/><text x="${x}" y="32.5" class="rm-ct">${t}</text>`;
+  if(kind==='mm') return `<svg class="rm" viewBox="0 0 240 64" aria-hidden="true">${box(2,58,'playlists','--h1')}${box(91,58,'bridge','--h3')}${box(180,58,'tracks','--h5')}<path d="M60 32H91M149 32H180" class="rm-l"/>${chip(67,'1')}${chip(84,'*')}${chip(156,'*')}${chip(173,'1')}</svg>`;
+  const [a,b,l,r]=kind==='11'?['drivers','vehicles','1','1']:['riders','rides','1','*'];
+  return `<svg class="rm" viewBox="0 0 240 64" aria-hidden="true">${box(4,80,a,'--h1')}${box(156,80,b,'--h2')}<path d="M84 32H156" class="rm-l"/>${chip(99,l)}${chip(141,r)}</svg>`;
+}
+function renderHome(){
+  const grid=$('#dbgrid');
+  grid.innerHTML=DBS.map(db=>{
+    const p=store.progress[db.id];const pr=p?progressOf(db,p):null;
+    const done=p&&p.complete;const started=pr&&(pr.pct>0||pr.bad>0);
+    const state=done?`<span class="db-state done">${ic('check')} Completed in ${fmtDur(p.stats.elapsed)}</span>`:started?`<span class="db-state">${pr.pct}% done</span>`:`<span class="db-state">Not started</span>`;
+    const go=done?'Review':started?'Continue':'Start';
+    return `<button class="db" data-act="open" data-db="${db.id}" style="--c:${db.tint}" aria-label="${esc(db.name)}, ${esc(db.domain)}. ${db.tableList.length} tables. ${done?'Completed':started?pr.pct+' percent done':'Not started'}">
+      <span class="db-head"><span class="db-ic">${ic(db.icon)}</span><span><b class="db-name">${esc(db.name)}</b><span class="db-dom">${esc(db.domain)}</span></span></span>
+      <span class="db-blurb">${esc(db.blurb)}</span>
+      <span class="db-tables">${db.tableList.map(t=>`<code>${t.id}</code>`).join('')}</span>
+      <span class="db-meta"><span>${db.tableList.length} tables</span><span>${db.relList.length} relationships</span><span>${db.joins.length} joins</span></span>
+      ${started&&!done?`<span class="db-bar"><i style="width:${pr.pct}%"></i></span>`:''}
+      <span class="db-foot">${state}<span class="db-go">${go}${ic('arrow')}</span></span>
+    </button>`;
+  }).join('')+`<button class="db primer" data-act="guide"><span class="primer-ic">${ic('guide')}</span><b class="db-name">New to keys and joins?</b><span class="db-blurb">Read the two-minute primer on primary keys, foreign keys, cardinality and join types before you start.</span><span class="db-go">Open the primer${ic('arrow')}</span></button>`;
+  const jg=$('#joingrid');
+  jg.innerHTML=[
+    ['Primary and foreign keys','<div class="db-tables" style="margin:6px 0 4px"><b class="fl pk">PK</b><b class="fl fk">FK</b><b class="fl uq">UQ</b><i class="fl nul">null</i></div>','A primary key identifies each row. A foreign key copies that value into another table to point at it.'],
+    ['One to many (1 : *)',relMini('1n'),'One rider takes many rides. The foreign key rides.rider_id repeats.'],
+    ['One to one (1 : 1)',relMini('11'),'Each driver has at most one car. The foreign key is also UNIQUE.'],
+    ['Many to many (* : *)',relMini('mm'),'A bridge table holds pairs, turning it into two one-to-many links.']
+  ].map(([h,v,p])=>`<div class="jcard"><h3>${h}</h3>${v}<p>${p}</p></div>`).join('')+
+  JTYPES.map(t=>`<div class="jcard"><h3>${JNAME[t]} JOIN</h3>${venn(t,{mini:true})}<p>${{INNER:'Only rows that match in both tables.',LEFT:'Every row from the left table, plus matches. No match shows NULL.',RIGHT:'Every row from the right table, plus matches from the left.',FULL:'Every row from both tables, matched where possible.'}[t]}</p></div>`).join('');
+  const nm=$('#pname');if(nm&&document.activeElement!==nm) nm.value=store.name||'';
+}
+function nameOk(){
+  const nm=$('#pname');const v=(nm.value||'').trim();
+  if(v.length>=2){store.name=v;save();return true;}
+  nm.classList.add('err');const help=$('#pname-help');help.classList.add('err');help.textContent='Enter your name first. It goes on your certificate.';
+  nm.focus();nm.scrollIntoView({behavior:RM()?'auto':'smooth',block:'center'});
+  return false;
+}
+function setHash(h){try{if(h) history.replaceState(null,'','#'+h);else history.replaceState(null,'',location.pathname+location.search);}catch(e){}}
+
+/* ---------- studio state ---------- */
+let S=null;
+function newProg(){return {pos:{},links:[],joins:{},stats:{elapsed:0,wrong:0,wrongJ:0,hints:0},complete:false,completedAt:0,lab:0,labIntro:false,labDone:false,modelDone:false,hintLv:{},seq:0,autoLayout:true};}
+function persist(){
+  if(!S) return;
+  S.prog.links=S.links.map(l=>({id:l.id,a:l.a,b:l.b,card:l.card}));
+  store.progress[S.db.id]=S.prog;save();
+}
+
+function openStudio(db){
+  closePops();while(modalStack.length) modalStack[0].close();
+  let prog=store.progress[db.id];
+  if(!prog||!prog.stats){prog=store.progress[db.id]=newProg();}
+  prog.joins=prog.joins||{};prog.hintLv=prog.hintLv||{};
+  S={db,prog,links:[],V:{x:0,y:0,k:1},els:{},armed:null,sel:null,pending:null,drag:null,labOpen:false,labFb:{},armTipShown:false};
+  S.links=(prog.links||[]).filter(l=>Col(db,l.a)&&Col(db,l.b)).map(l=>Object.assign({},l,gradeLink(db,l)));
+  $('#home').hidden=true;$('#studio').hidden=false;document.body.classList.add('in-studio');document.body.classList.remove('lab-open');
+  $('#tb-db').innerHTML=`<span class="db-ic" style="--c:${db.tint}">${ic(db.icon)}</span><b>${esc(db.name)}</b><span>${esc(db.domain)}</span>`;
+  renderTables();
+  const missing=db.tableList.some(t=>!prog.pos[t.id]);
+  if(missing){prog.autoLayout=true;defaultLayout();}
+  placeAll();refreshColors();renderLinks();refreshColStates();
+  fitView(null,false);
+  updateStatus(true);
+  $('.coach')&&$('.coach').remove();
+  if(!store.coachSeen) showCoach();
+  setHash(db.id);
+  live(`${db.name} database opened with ${db.tableList.length} tables. Connect the foreign keys to their primary keys.`);
+  if(document.fonts&&document.fonts.ready) document.fonts.ready.then(()=>{if(S&&S.db===db&&S.prog.autoLayout){defaultLayout();placeAll();renderLinks();fitView(null,false);}});
+}
+function goHome(){
+  if(S){persist();}
+  closePops();hideTip();
+  S=null;document.body.classList.remove('in-studio','lab-open');
+  $('#studio').hidden=true;$('#home').hidden=false;
+  setHash('');renderHome();window.scrollTo(0,0);
+}
+
+/* ---------- tables ---------- */
+function tableHTML(t){
+  const cols=t.colList.map(c=>{
+    const flags=(c.pk?'<b class="fl pk">PK</b>':'')+(c.fk?'<b class="fl fk">FK</b>':'')+(c.uq?'<b class="fl uq">UQ</b>':'')+(c.nullable?'<i class="fl nul">null</i>':'');
+    const aria=`${t.id}.${c.name}, ${c.type}${c.pk?(t.composite?', part of composite primary key':', primary key'):''}${c.fk?', foreign key':''}${c.uq?', unique':''}${c.nullable?', allows null':''}`;
+    return `<li class="col${c.pk?' is-pk':''}${c.fk?' is-fk':''}" data-t="${t.id}" data-c="${c.name}" tabindex="0" role="button" aria-label="${esc(aria)}"><span class="port l"></span><span class="kic">${c.pk?ic('key'):c.fk?ic('link'):''}</span><span class="cname">${c.name}</span><span class="ctype">${c.type}</span><span class="cflags">${flags}</span><span class="port r"></span></li>`;
+  }).join('');
+  return `<section class="tbl" data-t="${t.id}" style="--hue:${t.hue}" aria-label="Table ${t.id}, ${t.rows.length} sample rows"><header class="thead"><span class="tglyph">${ic('table')}</span><span class="tname">${t.id}</span><span class="tcount">${t.rows.length} rows</span><button class="tbtn" data-act="preview" data-t="${t.id}" aria-label="Preview ${t.id} sample data" title="Preview data">${ic('grid')}</button></header><ul class="cols">${cols}</ul></section>`;
+}
+function renderTables(){
+  const w=$('#world');$$('.tbl',w).forEach(e=>e.remove());S.els={};
+  S.db.tableList.forEach(t=>{const el=frag(tableHTML(t));w.appendChild(el);S.els[t.id]=el;});
+}
+function defaultLayout(){
+  const narrow=vpEl().clientWidth<700;const GX=narrow?70:120,GY=64;let cols=S.db.layout;
+  if(narrow){const f=cols.flat();cols=[f.filter((_,i)=>i%2===0),f.filter((_,i)=>i%2===1)];}
+  const sz=id=>({w:S.els[id].offsetWidth,h:S.els[id].offsetHeight});
+  const cw=cols.map(c=>Math.max(...c.map(id=>sz(id).w)));
+  const ch=cols.map(c=>c.reduce((s,id)=>s+sz(id).h,0)+GY*(c.length-1));
+  const maxH=Math.max(...ch);let x=0;
+  cols.forEach((c,i)=>{let y=(maxH-ch[i])/2+(i%2?28:0);c.forEach(id=>{S.prog.pos[id]={x:Math.round(x+(cw[i]-sz(id).w)/2),y:Math.round(y)};y+=sz(id).h+GY;});x+=cw[i]+GX;});
+  persist();
+}
+function placeAll(){S.db.tableList.forEach(t=>placeTable(t.id));}
+function placeTable(id){const p=S.prog.pos[id],el=S.els[id];el.style.left=p.x+'px';el.style.top=p.y+'px';}
+function tbox(id){const p=S.prog.pos[id],el=S.els[id];return {x:p.x,y:p.y,w:el.offsetWidth,h:el.offsetHeight};}
+const colEl=r=>S.els[r.t]?S.els[r.t].querySelector(`.col[data-c="${r.c}"]`):null;
+function colY(r){const row=colEl(r);return S.prog.pos[r.t].y+row.offsetTop+row.offsetHeight/2;}
+function refreshColStates(){
+  $$('.col.linked-ok,.col.linked-bad',$('#world')).forEach(e=>e.classList.remove('linked-ok','linked-bad'));
+  S.links.forEach(L=>[L.a,L.b].forEach(r=>{const el=colEl(r);if(!el) return;if(L.ok){el.classList.add('linked-ok');el.classList.remove('linked-bad');}else if(!el.classList.contains('linked-ok')) el.classList.add('linked-bad');}));
+}
+
+/* ---------- link geometry ---------- */
+const bez=(a,b,c,d,t)=>{const u=1-t;return {x:u*u*u*a.x+3*u*u*t*b.x+3*u*t*t*c.x+t*t*t*d.x,y:u*u*u*a.y+3*u*u*t*b.y+3*u*t*t*c.y+t*t*t*d.y};};
+function geomPts(A,ya,B,yb){
+  let sa,sb;
+  if(B.x>=A.x+A.w+24){sa=1;sb=-1;}else if(A.x>=B.x+B.w+24){sa=-1;sb=1;}else{sa=sb=1;}
+  const p0={x:A.x+(sa>0?A.w:0),y:ya},p3={x:B.x+(sb>0?B.w:0),y:yb};
+  let p1,p2;
+  if(sa!==sb){const c=clamp(Math.abs(p3.x-p0.x)*.5,40,170);p1={x:p0.x+sa*c,y:p0.y};p2={x:p3.x+sb*c,y:p3.y};}
+  else{const ex=Math.max(p0.x,p3.x)+48+Math.abs(p3.y-p0.y)*.18;p1={x:ex,y:p0.y};p2={x:ex,y:p3.y};}
+  return {p0,p1,p2,p3,sa,sb,d:`M${p0.x},${p0.y} C${p1.x},${p1.y} ${p2.x},${p2.y} ${p3.x},${p3.y}`,m:bez(p0,p1,p2,p3,.5),ca:{x:p0.x+sa*17,y:p0.y},cb:{x:p3.x+sb*17,y:p3.y}};
+}
+function geom(a,b){return geomPts(tbox(a.t),colY(a),tbox(b.t),colY(b));}
+function pairIsQ(L,q){const x={t:q.left[0],c:q.on[0]},y={t:q.right[0],c:q.on[1]};return (same(L.a,x)&&same(L.b,y))||(same(L.a,y)&&same(L.b,x));}
+function renderLinks(){
+  const g=$('#links-g');if(!g||!S) return;
+  const q=S.labOpen&&S.prog.labIntro&&!S.prog.labDone?S.db.joins[S.prog.lab]:null;
+  let s='';
+  for(const L of S.links){
+    const G=geom(L.a,L.b);const [ea,eb]=ends(L.card);
+    const cls=`lk ${L.ok?'ok':'bad'}${S.sel===L.id?' sel':''}${L.isNew?' new':''}${q?(pairIsQ(L,q)?' focus':' dim'):''}`;
+    const chip=(p,t)=>`<g class="chip" transform="translate(${p.x},${p.y})"><circle r="9"/><text y="0.5">${t}</text></g>`;
+    s+=`<g class="${cls}" data-id="${L.id}"><path class="hit" d="${G.d}"/><path class="ln" d="${G.d}"/>${chip(G.ca,ea)}${chip(G.cb,eb)}<g class="st" transform="translate(${G.m.x},${G.m.y})"><circle r="9"/>${L.ok?'<path d="M-4,0.5 l2.8,2.8 l5,-5.6"/>':'<path d="M0,-4.4 v4.8 M0,3.6 v0.2"/>'}</g></g>`;
+    L.isNew=false;
+  }
+  if(S.pending){const G=geom(S.pending.a,S.pending.b);s+=`<path class="tmp" d="${G.d}"/>`;}
+  if(S.drag) s+=`<path class="tmp" d="${S.drag.d}"/><circle class="tmp-dot" cx="${S.drag.x}" cy="${S.drag.y}" r="4"/>`;
+  g.innerHTML=s;
+}
+
+/* ---------- view ---------- */
+const vpEl=()=>$('#vp');
+function applyView(){
+  if(!S) return;const {x,y,k}=S.V;
+  $('#world').style.transform=`translate(${x}px,${y}px) scale(${k})`;
+  let s=24*k;while(s<11) s*=2;const big=s*5;const vp=vpEl();
+  vp.style.backgroundSize=`${s}px ${s}px, ${big}px ${big}px`;
+  vp.style.backgroundPosition=`${x}px ${y}px, ${x}px ${y}px`;
+  $('#zl').textContent=Math.round(k*100)+'%';
+  drawMinimap();
+}
+let viewAnim=0;
+function setView(to,anim){
+  cancelAnimationFrame(viewAnim);
+  if(!anim||RM()){Object.assign(S.V,to);applyView();return;}
+  const from={...S.V},t0=performance.now(),D=380;
+  const step=now=>{if(!S) return;const t=Math.min(1,(now-t0)/D),e=1-Math.pow(1-t,3);S.V.x=from.x+(to.x-from.x)*e;S.V.y=from.y+(to.y-from.y)*e;S.V.k=from.k+(to.k-from.k)*e;applyView();if(t<1) viewAnim=requestAnimationFrame(step);};
+  viewAnim=requestAnimationFrame(step);
+}
+function bbox(ids){
+  ids=ids||S.db.tableList.map(t=>t.id);let x0=1e9,y0=1e9,x1=-1e9,y1=-1e9;
+  ids.forEach(id=>{const b=tbox(id);x0=Math.min(x0,b.x);y0=Math.min(y0,b.y);x1=Math.max(x1,b.x+b.w);y1=Math.max(y1,b.y+b.h);});
+  return {x:x0,y:y0,w:x1-x0,h:y1-y0};
+}
+function fitView(ids,anim=true){
+  const vp=vpEl();const W=vp.clientWidth,H=vp.clientHeight;if(!W||!H) return;
+  const b=bbox(ids);const narrow=W<640;
+  const pl=narrow?16:36,pr=narrow?16:64,pt=narrow?16:32,pb=narrow?104:84;
+  const k=clamp(Math.min((W-pl-pr)/(b.w+70),(H-pt-pb)/(b.h+40)),.25,ids?1.1:1);
+  if(narrow&&!ids&&k<.5){setView({x:pl-b.x*.5+8,y:pt-b.y*.5+8,k:.5},anim);return;}
+  setView({x:pl+(W-pl-pr-b.w*k)/2-b.x*k,y:pt+(H-pt-pb-b.h*k)/2-b.y*k,k},anim);
+}
+function zoomAt(f,cx,cy){const k2=clamp(S.V.k*f,.25,2.2);const wx=(cx-S.V.x)/S.V.k,wy=(cy-S.V.y)/S.V.k;S.V.k=k2;S.V.x=cx-wx*k2;S.V.y=cy-wy*k2;applyView();}
+function zoomBy(f){const vp=vpEl();cancelAnimationFrame(viewAnim);zoomAt(f,vp.clientWidth/2,vp.clientHeight/2);}
+function centerOn(wx,wy,k){const vp=vpEl();k=k||Math.max(S.V.k,.8);setView({x:vp.clientWidth/2-wx*k,y:vp.clientHeight/2-wy*k,k},true);}
+function toWorld(cx,cy){const r=vpEl().getBoundingClientRect();return {x:(cx-r.left-S.V.x)/S.V.k,y:(cy-r.top-S.V.y)/S.V.k};}
+function toScreen(wx,wy){const r=vpEl().getBoundingClientRect();return {x:r.left+S.V.x+wx*S.V.k,y:r.top+S.V.y+wy*S.V.k};}
+
+/* ---------- minimap ---------- */
+function drawMinimap(){
+  const cv=$('#mm');if(!S||!cv) return;const box=cv.parentElement;const W=box.clientWidth,H=box.clientHeight;if(!W) return;
+  const dpr=Math.min(2,window.devicePixelRatio||1);if(cv.width!==Math.round(W*dpr)){cv.width=Math.round(W*dpr);cv.height=Math.round(H*dpr);}
+  const c=cv.getContext('2d');c.setTransform(dpr,0,0,dpr,0,0);c.clearRect(0,0,W,H);
+  const vp=vpEl();const vw=vp.clientWidth/S.V.k,vh=vp.clientHeight/S.V.k,vx=-S.V.x/S.V.k,vy=-S.V.y/S.V.k;
+  const b=bbox();const x0=Math.min(b.x,vx),y0=Math.min(b.y,vy),x1=Math.max(b.x+b.w,vx+vw),y1=Math.max(b.y+b.h,vy+vh);
+  const pad=10,top=18;const s=Math.min((W-pad*2)/(x1-x0),(H-top-pad)/(y1-y0));
+  const ox=pad+((W-pad*2)-(x1-x0)*s)/2-x0*s,oy=top+((H-top-pad)-(y1-y0)*s)/2-y0*s;
+  S.mm={s,ox,oy};
+  c.lineWidth=1.4;
+  S.links.forEach(L=>{const A=tbox(L.a.t),B=tbox(L.b.t);c.strokeStyle=L.ok?COL.ok:COL.bad;c.beginPath();c.moveTo(ox+(A.x+A.w/2)*s,oy+(A.y+A.h/2)*s);c.lineTo(ox+(B.x+B.w/2)*s,oy+(B.y+B.h/2)*s);c.stroke();});
+  S.db.tableList.forEach(t=>{const r=tbox(t.id);c.fillStyle=COL.h[t.hueIdx];c.globalAlpha=S.els[t.id].classList.contains('dim')?.3:.85;rrect(c,ox+r.x*s,oy+r.y*s,Math.max(3,r.w*s),Math.max(3,r.h*s),2);c.fill();});
+  c.globalAlpha=1;c.strokeStyle=COL.accent;c.lineWidth=1.5;c.fillStyle=COL.accent;
+  c.globalAlpha=.1;c.fillRect(ox+vx*s,oy+vy*s,vw*s,vh*s);c.globalAlpha=1;c.strokeRect(ox+vx*s,oy+vy*s,vw*s,vh*s);
+}
+function rrect(c,x,y,w,h,r){r=Math.min(r,w/2,h/2);c.beginPath();c.moveTo(x+r,y);c.arcTo(x+w,y,x+w,y+h,r);c.arcTo(x+w,y+h,x,y+h,r);c.arcTo(x,y+h,x,y,r);c.arcTo(x,y,x+w,y,r);c.closePath();}
+function mmMove(e,mm){const r=$('#minimap').getBoundingClientRect();const wx=(e.clientX-r.left-mm.ox)/mm.s,wy=(e.clientY-r.top-mm.oy)/mm.s;const vp=vpEl();S.V.x=vp.clientWidth/2-wx*S.V.k;S.V.y=vp.clientHeight/2-wy*S.V.k;applyView();}
+
+/* ---------- tooltip ---------- */
+let tipT=0,tipKey=null,tipEl=null,lastPt={x:0,y:0};
+function hideTip(){clearTimeout(tipT);tipKey=null;if(tipEl){tipEl.remove();tipEl=null;}}
+function placeTip(){if(!tipEl) return;const r=tipEl.getBoundingClientRect();let x=lastPt.x+16,y=lastPt.y+18;if(x+r.width>innerWidth-8) x=lastPt.x-r.width-12;if(y+r.height>innerHeight-8) y=lastPt.y-r.height-12;tipEl.style.left=Math.max(8,x)+'px';tipEl.style.top=Math.max(8,y)+'px';}
+function tipContent(key){
+  const db=S.db;
+  if(key.startsWith('h:')){const t=Tb(db,key.slice(2));return `<b>${t.id}</b><span class="tk">${t.rows.length} sample rows · ${t.colList.length} columns</span>${esc(t.desc)} Drag the header to move it.`;}
+  const [tid,cn]=key.slice(2).split('.');const t=Tb(db,tid),c=t.colMap[cn];
+  const parts=[c.type];if(c.pk) parts.push(t.composite?'part of composite PK':'primary key');if(c.fk) parts.push('foreign key');if(c.uq) parts.push('unique');parts.push(c.nullable?'allows NULL':'NOT NULL');
+  let body=c.desc||(c.pk&&!t.composite?`Identifies each ${t.one}. Never empty, never repeated.`:c.fk?'Holds values that match the primary key of another table.':'');
+  const linked=c.fk&&S.links.find(L=>L.ok&&L.rel&&same(L.rel.fk,{t:tid,c:cn}));
+  if(linked) body+=` Linked to ${qn(linked.rel.pk)}.`;
+  return `<b>${tid}.${cn}</b><span class="tk">${parts.join(' · ')}</span>${body?esc(body)+'<br>':''}<span style="opacity:.72">${esc(typeText(c.type))}</span>`;
+}
+function hoverTip(e){
+  if(e.pointerType!=='mouse'||!S) return;
+  lastPt={x:e.clientX,y:e.clientY};
+  const t=e.target;const col=t.closest&&t.closest('.col');const head=!col&&t.closest&&t.closest('.thead');
+  const key=col?`c:${col.dataset.t}.${col.dataset.c}`:head?`h:${head.parentElement.dataset.t}`:null;
+  if(key===tipKey){placeTip();return;}
+  hideTip();tipKey=key;if(!key) return;
+  tipT=setTimeout(()=>{if(tipKey!==key||!S) return;tipEl=frag(`<div class="tip-box" role="tooltip">${tipContent(key)}</div>`);document.body.appendChild(tipEl);placeTip();},420);
+}
+
+/* ---------- pointer interactions ---------- */
+let PI=null;const pointers=new Map();let autoRaf=0,autoV={x:0,y:0};
+function colAt(x,y){const el=document.elementFromPoint(x,y);const c=el&&el.closest&&el.closest('.col');return c&&$('#world').contains(c)?c:null;}
+function onDown(e){
+  if(!S) return;
+  if(e.pointerType==='mouse'&&e.button!==0) return;
+  const t=e.target;
+  if(t.closest('.zoombar,.minimap,.legend,.coach,.tbtn')) return;
+  hideTip();
+  pointers.set(e.pointerId,{x:e.clientX,y:e.clientY});
+  const vp=vpEl();try{vp.setPointerCapture(e.pointerId);}catch(err){}
+  if(pointers.size===2){
+    abortPI();const [a,b]=[...pointers.values()];
+    PI={mode:'pinch',d0:Math.hypot(a.x-b.x,a.y-b.y),k0:S.V.k,m0:{x:(a.x+b.x)/2,y:(a.y+b.y)/2},v0:{...S.V}};return;
+  }
+  const colE=t.closest('.col'),head=t.closest('.thead'),lk=t.closest('.lk');
+  if(colE){PI={mode:'col',id:e.pointerId,sx:e.clientX,sy:e.clientY,src:{t:colE.dataset.t,c:colE.dataset.c},el:colE};e.preventDefault();return;}
+  if(head){
+    const tid=head.parentElement.dataset.t;const w=toWorld(e.clientX,e.clientY);
+    PI={mode:'move',id:e.pointerId,tid,ox:w.x-S.prog.pos[tid].x,oy:w.y-S.prog.pos[tid].y,moved:false,sx:e.clientX,sy:e.clientY};
+    const el=S.els[tid];el.classList.add('dragging');$('#world').appendChild(el);return;
+  }
+  if(lk){PI={mode:'linkclick',id:e.pointerId,lid:lk.dataset.id,sx:e.clientX,sy:e.clientY};return;}
+  PI={mode:'pan',id:e.pointerId,sx:e.clientX,sy:e.clientY,vx:S.V.x,vy:S.V.y,moved:false};vp.classList.add('panning');
+  cancelAnimationFrame(viewAnim);
+}
+function onMove(e){
+  if(!S) return;
+  if(pointers.has(e.pointerId)) pointers.set(e.pointerId,{x:e.clientX,y:e.clientY});
+  if(!PI){hoverTip(e);return;}
+  if(PI.mode==='pinch'){
+    if(pointers.size<2) return;const [a,b]=[...pointers.values()];const d=Math.hypot(a.x-b.x,a.y-b.y);const m={x:(a.x+b.x)/2,y:(a.y+b.y)/2};
+    const r=vpEl().getBoundingClientRect();const k=clamp(PI.k0*d/PI.d0,.25,2.2);const cx=PI.m0.x-r.left,cy=PI.m0.y-r.top;
+    const wx=(cx-PI.v0.x)/PI.v0.k,wy=(cy-PI.v0.y)/PI.v0.k;S.V.k=k;S.V.x=cx-wx*k+(m.x-PI.m0.x);S.V.y=cy-wy*k+(m.y-PI.m0.y);applyView();return;
+  }
+  if(PI.id!==e.pointerId) return;
+  PI.last={x:e.clientX,y:e.clientY};
+  const dx=e.clientX-PI.sx,dy=e.clientY-PI.sy;
+  if(PI.mode==='col'&&Math.hypot(dx,dy)>5) startLinkDrag();
+  if(PI.mode==='link') linkDragTo(e.clientX,e.clientY);
+  else if(PI.mode==='move'){if(Math.hypot(dx,dy)>2) PI.moved=true;moveTo(e.clientX,e.clientY);}
+  else if(PI.mode==='pan'){if(Math.hypot(dx,dy)>3) PI.moved=true;S.V.x=PI.vx+dx;S.V.y=PI.vy+dy;applyView();}
+  if(PI&&(PI.mode==='link'||PI.mode==='move')) autoPan(e.clientX,e.clientY);
+}
+function onUp(e){
+  pointers.delete(e.pointerId);
+  if(!PI||!S) return;
+  if(PI.mode==='pinch'){if(pointers.size<2) PI=null;return;}
+  if(PI.id!==e.pointerId) return;
+  const p=PI;PI=null;stopAuto();
+  if(p.mode==='col') colActivate(p.el);
+  else if(p.mode==='link') finishLinkDrag(e.clientX,e.clientY,p);
+  else if(p.mode==='move'){S.els[p.tid].classList.remove('dragging');if(p.moved){S.prog.autoLayout=false;persist();drawMinimap();}}
+  else if(p.mode==='pan'){vpEl().classList.remove('panning');if(!p.moved){closePops();clearArmed();}}
+  else if(p.mode==='linkclick'){if(Math.hypot(e.clientX-p.sx,e.clientY-p.sy)<6) openLinkPop(p.lid,{x:e.clientX,y:e.clientY});}
+}
+function abortPI(){
+  if(!PI) return;
+  if(PI.mode==='link'){cleanupLinkDrag();}
+  if(PI.mode==='move') S.els[PI.tid].classList.remove('dragging');
+  vpEl().classList.remove('panning');PI=null;stopAuto();
+}
+function onCancel(e){pointers.delete(e.pointerId);if(PI&&PI.id===e.pointerId) abortPI();if(PI&&PI.mode==='pinch'&&pointers.size<2) PI=null;}
+function moveTo(cx,cy){const w=toWorld(cx,cy);const pos=S.prog.pos[PI.tid];pos.x=Math.round(w.x-PI.ox);pos.y=Math.round(w.y-PI.oy);placeTable(PI.tid);renderLinks();drawMinimap();}
+function autoPan(cx,cy){
+  const r=vpEl().getBoundingClientRect(),M=40,sp=12;
+  autoV.x=cx<r.left+M?sp:cx>r.right-M?-sp:0;autoV.y=cy<r.top+M?sp:cy>r.bottom-M?-sp:0;
+  if((autoV.x||autoV.y)&&!autoRaf){
+    const step=()=>{if(!PI||!(autoV.x||autoV.y)){autoRaf=0;return;}S.V.x+=autoV.x;S.V.y+=autoV.y;applyView();const l=PI.last;if(l){if(PI.mode==='move') moveTo(l.x,l.y);else if(PI.mode==='link') linkDragTo(l.x,l.y);}autoRaf=requestAnimationFrame(step);};
+    autoRaf=requestAnimationFrame(step);
+  }
+}
+function stopAuto(){cancelAnimationFrame(autoRaf);autoRaf=0;autoV={x:0,y:0};}
+
+function startLinkDrag(){
+  PI.mode='link';closePops();clearArmed();hideTip();
+  vpEl().classList.add('linking');PI.el.classList.add('source');S.els[PI.src.t].classList.add('src-tbl');
+  const c=$('.coach');if(c) dismissCoach();
+}
+function linkDragTo(cx,cy){
+  const tgt=colAt(cx,cy);const valid=tgt&&tgt.dataset.t!==PI.src.t?tgt:null;
+  if(PI.tgt&&PI.tgt!==valid) PI.tgt.classList.remove('target');
+  if(valid) valid.classList.add('target');PI.tgt=valid;
+  const w=toWorld(cx,cy);const A=tbox(PI.src.t),ya=colY(PI.src);
+  let end=w,d;
+  if(valid){const b={t:valid.dataset.t,c:valid.dataset.c};const G=geom(PI.src,b);d=G.d;end=G.p3;}
+  else{const sa=w.x>A.x+A.w/2?1:-1;const p0={x:A.x+(sa>0?A.w:0),y:ya};const c=clamp(Math.abs(w.x-p0.x)*.5,30,150);d=`M${p0.x},${p0.y} C${p0.x+sa*c},${p0.y} ${w.x-sa*c*.3},${w.y} ${w.x},${w.y}`;}
+  S.drag={d,x:end.x,y:end.y};renderLinks();
+}
+function cleanupLinkDrag(){
+  vpEl().classList.remove('linking');$$('.col.source,.col.target').forEach(e=>e.classList.remove('source','target'));
+  $$('.tbl.src-tbl').forEach(e=>e.classList.remove('src-tbl'));S.drag=null;renderLinks();
+}
+function finishLinkDrag(cx,cy,p){
+  const tgt=p.tgt||colAt(cx,cy);cleanupLinkDrag();
+  if(!tgt){return;}
+  if(tgt.dataset.t===p.src.t){toast('Pick a column in a different table.');return;}
+  proposeLink(p.src,{t:tgt.dataset.t,c:tgt.dataset.c},{x:cx,y:cy});
+}
+function clearArmed(){if(S&&S.armed){S.armed=null;}$$('.col.armed').forEach(e=>e.classList.remove('armed'));}
+function colActivate(el){
+  const ref={t:el.dataset.t,c:el.dataset.c};
+  if(S.armed){
+    if(same(S.armed,ref)){clearArmed();return;}
+    if(S.armed.t===ref.t){clearArmed();S.armed=ref;el.classList.add('armed');return;}
+    const a=S.armed;clearArmed();const r=el.getBoundingClientRect();proposeLink(a,ref,{x:r.left+r.width/2,y:r.bottom});return;
+  }
+  closePops();S.armed=ref;el.classList.add('armed');
+  if(!S.armTipShown){S.armTipShown=true;toast(`${ref.t}.${ref.c} picked. Now ${matchMedia('(pointer: coarse)').matches?'tap':'click'} the matching column in another table.${matchMedia('(pointer: coarse)').matches?'':' Esc cancels.'}`);}
+}
+function proposeLink(a,b,pt){
+  const ex=S.links.find(L=>(same(L.a,a)&&same(L.b,b))||(same(L.a,b)&&same(L.b,a)));
+  if(ex){toast('These columns are already connected. Click the line to change it.');openLinkPop(ex.id,pt);return;}
+  openChooser(a,b,pt);
+}
+
+/* ---------- popovers ---------- */
+function closePops(){$$('.pop').forEach(p=>p.remove());if(S){S.pending=null;if(S.sel){S.sel=null;}renderLinks();}}
+function placePop(el,pt){
+  document.body.appendChild(el);const r=el.getBoundingClientRect(),M=12;
+  let x,y;
+  if(innerWidth<560){x=(innerWidth-r.width)/2;y=innerHeight-r.height-64;}
+  else{x=pt.x+16;y=pt.y+12;if(x+r.width>innerWidth-M) x=pt.x-r.width-16;if(y+r.height>innerHeight-M) y=innerHeight-r.height-M;}
+  el.style.left=Math.max(M,x)+'px';el.style.top=Math.max(M,y)+'px';
+}
+function openChooser(a,b,pt){
+  closePops();S.pending={a,b};renderLinks();
+  const db=S.db,A=Tb(db,a.t),B=Tb(db,b.t);
+  const el=frag(`<div class="pop" role="dialog" aria-labelledby="ch-h">
+    <h3 id="ch-h">${ic('link')}New relationship</h3>
+    <div class="pair"><code>${a.t}.${a.c}</code><span class="arr">${ic('arrow')}</span><code>${b.t}.${b.c}</code></div>
+    <p style="margin-top:8px;font-size:12px;color:var(--ink-3)">How many rows can match? Read each option as ${a.t} : ${b.t}.</p>
+    <div class="opts" role="radiogroup" aria-label="Cardinality">${CARDS.map(cd=>`<button class="opt" role="radio" aria-checked="false" data-card="${cd}"><span class="mk">${CARD_INFO[cd].mk}</span><b>${CARD_INFO[cd].name}</b><small>${esc(cardSentence(cd,A,B))}</small></button>`).join('')}</div>
+    <p class="tip"><b>How to tell:</b> a PK or UQ column holds each value once, so that side is one (1). A plain FK can repeat, so that side is many (*).</p>
+    <div class="pop-f"><button class="btn ghost sm" data-x="cancel">Cancel</button><button class="btn primary sm" data-x="create" disabled>Create relationship</button></div></div>`);
+  let pick=null;const opts=$$('.opt',el),create=$('[data-x="create"]',el);
+  const choose=o=>{opts.forEach(x=>x.setAttribute('aria-checked',x===o?'true':'false'));pick=o.dataset.card;create.disabled=false;};
+  const doCreate=()=>{if(!pick) return;el.remove();S.pending=null;addLink(a,b,pick);};
+  opts.forEach((o,i)=>{o.addEventListener('click',()=>choose(o));o.addEventListener('dblclick',()=>{choose(o);doCreate();});
+    o.addEventListener('keydown',e=>{if(['ArrowRight','ArrowDown','ArrowLeft','ArrowUp'].includes(e.key)){e.preventDefault();const n=opts[(i+(e.key==='ArrowRight'||e.key==='ArrowDown'?1:3))%4];n.focus();choose(n);}else if(e.key==='Enter'&&pick===o.dataset.card){e.preventDefault();doCreate();}});});
+  create.addEventListener('click',doCreate);
+  $('[data-x="cancel"]',el).addEventListener('click',()=>closePops());
+  placePop(el,pt);setTimeout(()=>opts[0].focus(),20);
+}
+function addLink(a,b,card){
+  const L={id:'l'+(++S.prog.seq),a,b,card};Object.assign(L,gradeLink(S.db,L));L.isNew=true;
+  S.links.push(L);
+  if(!L.ok){S.prog.stats.wrong++;toast(`Incorrect. ${L.reason}`,'bad',6000);}
+  else toast(`Correct. ${okText(S.db,L.rel)}`,'ok');
+  persist();renderLinks();refreshColStates();updateStatus();
+}
+function openLinkPop(id,pt){
+  const L=S.links.find(l=>l.id===id);if(!L) return;
+  closePops();S.sel=id;renderLinks();
+  const db=S.db;const [ea,eb]=ends(L.card);
+  const el=frag(`<div class="pop" role="dialog" aria-label="Relationship details">
+    <div style="display:flex;align-items:center;justify-content:space-between;gap:8px"><h3>${ic('link')}Relationship</h3><span class="verdict ${L.ok?'ok':'bad'}">${ic(L.ok?'check':'alert')}${L.ok?'Correct':'Incorrect'}</span></div>
+    <div class="pair"><code>${qn(L.a)}</code><span class="arr mono">${ea} ── ${eb}</span><code>${qn(L.b)}</code></div>
+    <p class="reason">${esc(L.ok?okText(db,L.rel):L.reason)}</p>
+    ${L.ok?`<div class="sqlon">JOIN ${L.b.t} ON ${qn(L.a)} = ${qn(L.b)}</div>`:''}
+    <div style="margin-top:12px;font-size:12px;font-weight:600">Cardinality (${L.a.t} : ${L.b.t})</div>
+    <div class="seg" role="group" aria-label="Change cardinality">${CARDS.map(c=>`<button data-card="${c}" aria-pressed="${c===L.card}" title="${CARD_INFO[c].name}">${CARD_INFO[c].mk}</button>`).join('')}</div>
+    <div class="pop-f"><button class="btn danger sm" data-x="del">${ic('trash')}Delete</button><button class="btn primary sm" data-x="done">Done</button></div></div>`);
+  $$('.seg button',el).forEach(b=>b.addEventListener('click',()=>{
+    if(b.dataset.card===L.card) return;
+    L.card=b.dataset.card;const was=L.ok;Object.assign(L,gradeLink(db,L));
+    if(!L.ok){S.prog.stats.wrong++;}
+    if(L.ok&&!was) toast(`Correct. ${okText(db,L.rel)}`,'ok');
+    persist();refreshColStates();updateStatus();const r=el.getBoundingClientRect();openLinkPop(L.id,{x:r.left-16,y:r.top-12});
+  }));
+  $('[data-x="del"]',el).addEventListener('click',()=>deleteLink(L.id));
+  $('[data-x="done"]',el).addEventListener('click',()=>closePops());
+  placePop(el,pt);setTimeout(()=>$('[data-x="done"]',el).focus(),20);
+}
+function deleteLink(id){
+  S.links=S.links.filter(l=>l.id!==id);closePops();persist();refreshColStates();renderLinks();updateStatus();toast('Relationship deleted.');
+}
+function focusLink(L){const G=geom(L.a,L.b);centerOn(G.m.x,G.m.y);setTimeout(()=>{if(!S) return;const p=toScreen(G.m.x,G.m.y);openLinkPop(L.id,p);},RM()?0:420);}
+
+/* ---------- coach ---------- */
+function showCoach(){
+  const touch=matchMedia('(pointer: coarse)').matches;
+  const el=frag(`<div class="coach" role="dialog" aria-label="How to build the model"><h3>Connect the tables</h3><ol>
+    <li><span><b>${touch?'Tap a column':'Drag a column'}</b> ${touch?'and then tap the matching column in another table':'onto the matching column in another table'}. Columns marked FK are a good place to start.</span></li>
+    <li><span><b>Pick the relationship type</b>, one to one or one to many.</span></li>
+    <li><span><b>Green means correct.</b> Red means try again. Click any line to see why or to fix it.</span></li></ol>
+    <p style="margin-top:10px;font-size:12.5px;color:var(--ink-3)">${touch?'Pinch to zoom and drag empty space to pan. Tap the grid icon on a table to see its sample rows.':'Scroll to zoom, drag empty space to pan, and hover a column to see its type and size.'}</p>
+    <div class="pop-f"><button class="btn primary sm" data-x="ok">Got it</button></div></div>`);
+  $('[data-x="ok"]',el).addEventListener('click',dismissCoach);
+  vpEl().appendChild(el);
+}
+function dismissCoach(){const c=$('.coach');if(c) c.remove();store.coachSeen=true;save();}
+
+/* ---------- status ---------- */
+function updateStatus(silent){
+  if(!S) return;const db=S.db,p=S.prog;
+  const okSet=new Set(S.links.filter(l=>l.ok).map(l=>l.rel.i));const nrel=db.relList.length;
+  const bad=S.links.filter(l=>!l.ok).length;const nj=db.joins.length;const jok=db.joins.filter((q,i)=>p.joins[i]&&p.joins[i].done).length;
+  const pct=Math.floor((okSet.size+jok)/(nrel+nj)*100);
+  $('#prog-i').style.width=pct+'%';$('#prog-pct').textContent=pct+'%';$('#prog').classList.toggle('full',pct===100&&bad===0);
+  $('#prog').setAttribute('aria-label',`${pct} percent complete`);
+  $('#sb-rel').textContent=`${okSet.size}/${nrel}`;
+  $('#sb-pips').innerHTML=db.relList.map(r=>`<i class="${okSet.has(r.i)?'on':''}"></i>`).join('');
+  const bp=$('#sb-bad');bp.hidden=bad===0;
+  if(bad) bp.innerHTML=`${ic('alert')}${bad} incorrect ${plural(bad,'relationship','relationships')}${pct===100?'. Remove to finish':''}`;
+  $('#sb-lab').textContent=`${jok}/${nj}`;
+  $('#sb-wrong').textContent=p.stats.wrong+p.stats.wrongJ;$('#sb-hints').textContent=p.stats.hints;
+  $('#sb-time').textContent=fmtClock(p.stats.elapsed);
+  const modelNow=okSet.size===nrel;
+  if(modelNow&&!p.modelDone){p.modelDone=true;persist();if(!silent){toast('Model complete. The Join Lab is unlocked.','ok',4200);setTimeout(()=>{if(S&&!S.labOpen) openLab();},1100);}}
+  $('#ph-model').classList.toggle('done',modelNow);
+  const lb=$('#ph-lab');lb.disabled=!p.modelDone;lb.classList.toggle('done',jok===nj);
+  lb.title=p.modelDone?'Open the Join Lab':'Finish every relationship to unlock the Join Lab';
+  lb.querySelector('.n').innerHTML=p.modelDone?'2':ic('lock');
+  $('#ph-model').setAttribute('aria-current',S.labOpen?'false':'step');lb.setAttribute('aria-current',S.labOpen?'step':'false');
+  $('#btn-cert').hidden=!p.complete;
+  if(modelNow&&jok===nj&&bad===0&&!p.complete&&!silent) complete();
+}
+setInterval(()=>{
+  if(!S||S.prog.complete||document.hidden) return;
+  S.prog.stats.elapsed++;const t=$('#sb-time');if(t) t.textContent=fmtClock(S.prog.stats.elapsed);
+  if(S.prog.stats.elapsed%10===0) persist();
+},1000);
+
+/* ---------- hints ---------- */
+function pulse(el){if(!el) return;el.classList.remove('pulse');void el.offsetWidth;el.classList.add('pulse');setTimeout(()=>el.classList.remove('pulse'),3800);}
+function modelHint(){
+  const bad=S.links.find(l=>!l.ok);
+  if(bad){focusLink(bad);toast('Fix the red relationship first. Its note explains what is wrong.','bad');return;}
+  const miss=S.db.relList.find(r=>!S.links.some(l=>l.ok&&l.rel===r));
+  if(!miss){if(S.prog.modelDone) openLab();else toast('Every relationship is in place.');return;}
+  const lv=S.prog.hintLv[miss.i]||0;S.prog.hintLv[miss.i]=lv+1;S.prog.stats.hints++;
+  const fe=colEl(miss.fk);pulse(fe);
+  if(lv===0){const b=tbox(miss.fk.t);centerOn(b.x+b.w/2,colY(miss.fk));toast(`Look at ${qn(miss.fk)}. It's a foreign key. Which table has a primary key holding the same values?`,'',7000);}
+  else{pulse(colEl(miss.pk));const b=bbox([miss.fk.t,miss.pk.t]);centerOn(b.x+b.w/2,b.y+b.h/2,clamp(Math.min(vpEl().clientWidth/(b.w+160),vpEl().clientHeight/(b.h+160)),.35,1));toast(`Drag ${qn(miss.fk)} onto ${qn(miss.pk)}. Then ask yourself: can ${miss.fk.c} repeat in ${miss.fk.t}?`,'',8000);}
+  persist();updateStatus();
+}
+
+/* ---------- Join Lab ---------- */
+function joinData(q){
+  const db=S.db,L=Tb(db,q.left[0]),R=Tb(db,q.right[0]);const lk=L.colMap[q.on[0]].idx,rk=R.colMap[q.on[1]].idx;
+  const lMatch=L.rows.map(l=>R.rows.filter(r=>l[lk]!==null&&r[rk]===l[lk]));
+  const rMatched=R.rows.map(r=>r[rk]!==null&&L.rows.some(l=>l[lk]===r[rk]));
+  return {L,R,lk,rk,lMatch,rMatched,lo:L.rows.filter((l,i)=>!lMatch[i].length),ro:R.rows.filter((r,i)=>!rMatched[i]),pairs:lMatch.reduce((s,m)=>s+m.length,0)};
+}
+function joinRows(type,D){
+  const [kl,kr]=KEEP[type];const out=[];
+  D.L.rows.forEach((l,i)=>{if(D.lMatch[i].length) D.lMatch[i].forEach(r=>out.push({l,r,k:'both'}));else if(kl) out.push({l,r:null,k:'left'});});
+  if(kr) D.R.rows.forEach((r,i)=>{if(!D.rMatched[i]) out.push({l:null,r,k:'right'});});
+  return out;
+}
+function joinRule(type,q){
+  const L=q.left[0],R=q.right[0];
+  return {INNER:'INNER JOIN keeps only the rows that match on both sides.',LEFT:`LEFT JOIN keeps every row from ${L}, the table before JOIN, and adds matches from ${R}.`,RIGHT:`RIGHT JOIN keeps every row from ${R}, the table after JOIN, and adds matches from ${L}.`,FULL:'FULL OUTER JOIN keeps every row from both tables and matches them where it can.'}[type];
+}
+function judge(pick,q,D){
+  const [pl,pr]=KEEP[pick],[cl,cr]=KEEP[q.type];const L=q.left[0],R=q.right[0];
+  if(pick===q.type){
+    let s=joinRule(pick,q);
+    if(cl&&D.lo.length) s+=` ${namesOf(D.L,D.lo)} ${plural(D.lo.length,'has','have')} no match in ${R}, so the ${R} columns show NULL.`;
+    if(cr&&D.ro.length) s+=` ${namesOf(D.R,D.ro)} ${plural(D.ro.length,'has','have')} no match in ${L}, so the ${L} columns show NULL.`;
+    if(!cl&&!cr) s+=` Rows without a partner, like ${namesOf(D.L,D.lo.slice(0,1))} and ${namesOf(D.R,D.ro.slice(0,1))}, are left out.`;
+    return {ok:true,html:`<p><b>Correct.</b> ${esc(s)}</p>`};
+  }
+  const out=[];
+  if(pl&&!cl) out.push(`Your result includes ${q.lo} (${namesOf(D.L,D.lo)}). The request doesn't ask for them.`);
+  if(!pl&&cl) out.push(`Your result drops ${q.lo} (${namesOf(D.L,D.lo)}). The request says they must appear.`);
+  if(pr&&!cr) out.push(`Your result includes ${q.ro} (${namesOf(D.R,D.ro)}). The request doesn't ask for them.`);
+  if(!pr&&cr) out.push(`Your result drops ${q.ro} (${namesOf(D.R,D.ro)}). The request says they must appear.`);
+  return {ok:false,html:`<p><b>Not quite.</b> ${esc(out.join(' '))}</p><p>${esc(joinRule(pick,q))}</p>`};
+}
+function sqlHTML(q,pick){
+  const kw=w=>`<span class="kw">${w}</span>`;const [lt,la]=q.left,[rt,ra]=q.right;
+  const cols=q.select.map(s=>{const [al,c]=s.split('.');return `<span class="${al===la?'ta':'tb'}">${al}</span>.${c}`;}).join(', ');
+  return `${kw('SELECT')} ${cols}\n${kw('FROM')} <span class="ta">${lt}</span> ${kw('AS')} <span class="ta">${la}</span>\n<span class="slot${pick?' filled':''}">${pick?JNAME[pick]:'?'}</span> ${kw('JOIN')} <span class="tb">${rt}</span> ${kw('AS')} <span class="tb">${ra}</span>\n  ${kw('ON')} <span class="ta">${la}</span>.${q.on[0]} = <span class="tb">${ra}</span>.${q.on[1]};`;
+}
+function srcHTML(side,q,D,pick){
+  const t=side==='L'?D.L:D.R,al=side==='L'?q.left[1]:q.right[1],key=side==='L'?q.on[0]:q.on[1];
+  const cols=[key,...q.select.filter(s=>s.split('.')[0]===al).map(s=>s.split('.')[1]).filter(c=>c!==key)].slice(0,3).map(c=>t.colMap[c]);
+  const keep=pick?KEEP[pick][side==='L'?0:1]:null;
+  const rows=t.rows.map((r,i)=>{const matched=side==='L'?D.lMatch[i].length>0:D.rMatched[i];const cls=[matched?'':'nomatch',pick?(matched||keep?'kept':'dropped'):''].filter(Boolean).join(' ');
+    return `<tr class="${cls}">${cols.map(c=>`<td class="${c.name===key?'key':''}">${fmtCell(c,r[c.idx])}</td>`).join('')}</tr>`;}).join('');
+  return `<div class="src ${side}"><div class="src-h">${ic('table')}${t.id} AS ${al}<span class="side">${side==='L'?'left table':'right table'}</span></div><div class="dtable-wrap"><table class="dt"><thead><tr>${cols.map(c=>`<th>${c.name}</th>`).join('')}</tr></thead><tbody>${rows}</tbody></table></div></div>`;
+}
+function resultHTML(q,D,pick){
+  const sel=q.select.map(s=>{const [al,c]=s.split('.');const side=al===q.left[1]?'l':'r';return {side,al,c,col:(side==='l'?D.L:D.R).colMap[c]};});
+  const rows=joinRows(pick,D);
+  return {n:rows.length,html:`<div class="dtable-wrap"><table class="dt"><thead><tr>${sel.map(s=>`<th><span class="al">${s.al}.</span>${s.c}</th>`).join('')}</tr></thead><tbody>${rows.map(r=>`<tr class="k-${r.k} newrow">${sel.map(s=>{const src=s.side==='l'?r.l:r.r;return `<td>${src?fmtCell(s.col,src[s.col.idx]):'<span class="null">NULL</span>'}</td>`;}).join('')}</tr>`).join('')}</tbody></table></div>`};
+}
+function labState(i){return S.prog.joins[i]||(S.prog.joins[i]={pick:null,done:false,tries:0,hinted:false});}
+function openLab(){
+  if(!S.prog.modelDone){toast('Finish every relationship first. The Join Lab uses them.');const b=$('#ph-lab');b.classList.remove('shake');void b.offsetWidth;b.classList.add('shake');return;}
+  closePops();clearArmed();document.body.classList.add('lab-open');S.labOpen=true;renderLab();updateStatus(true);
+  setTimeout(labFocus,320);
+}
+function closeLab(){
+  document.body.classList.remove('lab-open');S.labOpen=false;
+  S.db.tableList.forEach(t=>S.els[t.id].classList.remove('dim'));renderLinks();updateStatus(true);
+  setTimeout(()=>{if(S) fitView(null,true);},320);
+}
+function labFocus(){
+  if(!S||!S.labOpen) return;
+  const p=S.prog;const active=p.labIntro&&!p.labDone;const q=S.db.joins[p.lab];const ids=active?[q.left[0],q.right[0]]:null;
+  S.db.tableList.forEach(t=>S.els[t.id].classList.toggle('dim',!!ids&&!ids.includes(t.id)));
+  renderLinks();drawMinimap();fitView(ids,true);
+}
+function renderLab(){
+  const db=S.db,p=S.prog,n=db.joins.length;
+  $('#lab-x').innerHTML=ic('x');
+  $('#qpips').innerHTML=db.joins.map((q,i)=>{const st=p.joins[i];const done=st&&st.done;return `<button class="qpip${done?' done':''}" data-act="lab-go" data-i="${i}" aria-current="${p.labIntro&&!p.labDone&&i===p.lab}" aria-label="Question ${i+1}${done?', solved':''}">${done?ic('check'):'Q'+(i+1)}</button>`;}).join('');
+  const body=$('#lab-b'),foot=$('#lab-f');
+  if(!p.labIntro){
+    body.innerHTML=`<div class="lab-intro"><h3>Your model is ready. Now query it.</h3>
+      <p>Each question is a real business request and a SQL query with one blank. Pick the join that returns exactly the rows the request asks for.</p>
+      <p>The result updates live, so you can try every option before you check. Rows with no match show NULL, and rows a join drops fade out in the source tables.</p>
+      <div class="gvenn">${venn('INNER',{mini:true})}<div><b>INNER</b><p>Matches only.</p></div>${venn('LEFT',{mini:true})}<div><b>LEFT</b><p>All of the table before JOIN.</p></div>${venn('RIGHT',{mini:true})}<div><b>RIGHT</b><p>All of the table after JOIN.</p></div>${venn('FULL',{mini:true})}<div><b>FULL OUTER</b><p>All rows from both.</p></div></div></div>`;
+    foot.innerHTML=`<div class="lab-actions"><span class="grow"></span><button class="btn primary" data-act="lab-start">Start question 1${ic('arrow')}</button></div>`;
+    return;
+  }
+  if(p.labDone){
+    const bad=S.links.filter(l=>!l.ok).length;
+    body.innerHTML=`<div class="lab-done"><div class="seal">${ic('check')}</div><h3>All ${n} joins solved</h3><p>${bad?`One step left. Remove the red ${plural(bad,'relationship','relationships')} on the canvas to reach 100%.`:'You know when to use INNER, LEFT, RIGHT and FULL OUTER. Nice work.'}</p></div>`;
+    foot.innerHTML=`<div class="lab-actions"><button class="btn ghost sm" data-act="lab-review">Review questions</button><span class="grow"></span>${p.complete?`<button class="btn primary" data-act="cert">${ic('cert')}Show certificate</button>`:bad?`<button class="btn primary" data-act="show-bad">Show the red line</button>`:''}</div>`;
+    return;
+  }
+  const i=p.lab,q=db.joins[i],st=labState(i),D=joinData(q),pick=st.pick;
+  let res='';let cnt='';
+  if(pick){const r=resultHTML(q,D,pick);res=r.html;cnt=`${r.n} ${plural(r.n,'row','rows')}`;}
+  else res='<div class="empty">Pick a join type to see which rows come back.</div>';
+  body.innerHTML=`<div class="ask"><small>Question ${i+1} of ${n}</small>${esc(q.ask)}</div>
+    <div class="sqlrow"><pre class="sql" aria-label="SQL query with a blank join type">${sqlHTML(q,pick)}</pre><div class="venn-big" title="Numbers show rows with no match on each side and the matching pairs in the middle">${venn(pick,{counts:[D.lo.length,D.pairs,D.ro.length],labels:[q.left[0],q.right[0]]})}</div></div>
+    <div class="lab-sec"><h4>Pick the join</h4><div class="jpick" role="radiogroup" aria-label="Join type">${JTYPES.map(t=>`<button class="jbtn" role="radio" aria-checked="${pick===t}" data-act="pick" data-type="${t}">${venn(t,{mini:true})}<b>${JNAME[t]}</b></button>`).join('')}</div></div>
+    <div class="lab-sec"><h4>Source rows <span class="cnt">No match: ${D.lo.length} in ${q.left[0]}, ${D.ro.length} in ${q.right[0]}</span></h4><div class="srcs">${srcHTML('L',q,D,pick)}${srcHTML('R',q,D,pick)}</div></div>
+    <div class="lab-sec result"><h4>Result <span class="cnt">${cnt}</span></h4>${res}</div>`;
+  renderLabFoot();
+}
+function renderLabFoot(){
+  const p=S.prog,i=p.lab,st=labState(i),q=S.db.joins[i],fb=S.labFb[i];const foot=$('#lab-f');
+  let h='';
+  if(st.done){const D=joinData(q);h+=`<div class="fb ok">${ic('check')}<div>${judge(q.type,q,D).html}</div></div>`;}
+  else if(fb) h+=`<div class="fb ${fb.kind}">${ic(fb.kind==='bad'?'alert':'info')}<div>${fb.html}</div></div>`;
+  const last=S.db.joins.every((qq,j)=>j===i||(p.joins[j]&&p.joins[j].done));
+  h+=`<div class="lab-actions"><button class="btn ghost sm" data-act="lab-hint" ${st.done?'disabled':''}>${ic('hint')}Hint</button><span class="grow"></span>${st.done?`<button class="btn primary" data-act="lab-next">${last?'Finish':'Next question'}${ic('arrow')}</button>`:`<button class="btn primary" data-act="lab-check" ${st.pick?'':'disabled'}>Check answer</button>`}</div>`;
+  foot.innerHTML=h;
+}
+function labPick(type){
+  const st=labState(S.prog.lab);st.pick=type;if(!st.done) delete S.labFb[S.prog.lab];
+  const sc=$('#lab-b').scrollTop;renderLab();$('#lab-b').scrollTop=sc;persist();
+  const b=$(`.jbtn[data-type="${type}"]`);b&&b.focus();
+}
+function labCheck(){
+  const i=S.prog.lab,q=S.db.joins[i],st=labState(i);if(!st.pick||st.done) return;
+  st.tries++;const D=joinData(q);const v=judge(st.pick,q,D);
+  if(v.ok){st.done=true;delete S.labFb[i];if(!S.db.joins.every((qq,j)=>S.prog.joins[j]&&S.prog.joins[j].done)) toast(`Question ${i+1} solved.`,'ok');}
+  else{S.prog.stats.wrongJ++;S.labFb[i]={kind:'bad',html:v.html};const jp=$('.jpick');if(jp){jp.classList.remove('shake');void jp.offsetWidth;jp.classList.add('shake');}}
+  persist();renderLab();updateStatus();
+  if(v.ok){const f=$('[data-act="lab-next"]');f&&f.focus();}
+}
+function labHint(){
+  const i=S.prog.lab,q=S.db.joins[i],st=labState(i);if(st.done) return;
+  if(!st.hinted){st.hinted=true;S.prog.stats.hints++;}
+  S.labFb[i]={kind:'info',html:`<p><b>Hint.</b> ${esc(`Which table must keep all of its rows: ${q.left[0]} (written before JOIN), ${q.right[0]} (after JOIN), both, or neither? After you pick, faded rows in Source rows are the ones that join drops.`)}</p>`};
+  persist();renderLabFoot();updateStatus();
+}
+function labNext(){
+  const p=S.prog,n=S.db.joins.length;
+  const nxt=[...Array(n).keys()].map(k=>(p.lab+1+k)%n).find(j=>!(p.joins[j]&&p.joins[j].done));
+  if(nxt===undefined){p.labDone=true;}else p.lab=nxt;
+  persist();renderLab();$('#lab-b').scrollTop=0;labFocus();updateStatus();
+}
+
+/* ---------- completion ---------- */
+function totals(){const p=S.prog;const nrel=S.db.relList.length,nj=S.db.joins.length;const wrong=p.stats.wrong+p.stats.wrongJ;return {nrel,nj,wrong,hints:p.stats.hints,secs:p.stats.elapsed,acc:Math.round((nrel+nj)/(nrel+nj+wrong)*100)};}
+function complete(){
+  const p=S.prog;p.complete=true;p.completedAt=Date.now();p.labDone=true;persist();updateStatus(true);
+  if(S.labOpen) renderLab();
+  live('All done. 100 percent complete.');
+  confetti();setTimeout(()=>{if(S) showCertificate();},RM()?0:900);
+}
+function confetti(){
+  if(RM()) return;
+  const cv=document.createElement('canvas');cv.className='confetti';document.body.appendChild(cv);
+  const dpr=Math.min(2,window.devicePixelRatio||1),W=innerWidth,H=innerHeight;cv.width=W*dpr;cv.height=H*dpr;const c=cv.getContext('2d');c.scale(dpr,dpr);
+  const cols=[COL.accent,COL.ok,COL.pk,COL.right,COL.uq,COL.fk,COL.h[4]];const glyphs=['1','*','⋈'];const parts=[];
+  const burst=(x,y,ang,spread,n,sp)=>{for(let i=0;i<n;i++){const a=(ang+(Math.random()-.5)*spread)*Math.PI/180,v=sp*(.55+Math.random()*.6);parts.push({x,y,vx:Math.cos(a)*v,vy:Math.sin(a)*v,r:Math.random()*6.28,vr:(Math.random()-.5)*.3,s:6+Math.random()*7,c:cols[i%cols.length],g:Math.random()<.16?glyphs[i%3]:null,sh:Math.random()<.3?1:0,w:Math.random()*6.28});}};
+  burst(W*.08,H,-62,40,90,22);burst(W*.92,H,-118,40,90,22);
+  setTimeout(()=>burst(W*.5,H*.32,-90,360,80,13),260);
+  const t0=performance.now();
+  const step=now=>{
+    c.clearRect(0,0,W,H);
+    parts.forEach(p=>{p.vy+=.32;p.vx*=.99;p.vy*=.99;p.x+=p.vx+Math.sin(p.w+=.08)*.6;p.y+=p.vy;p.r+=p.vr;
+      c.save();c.translate(p.x,p.y);c.rotate(p.r);c.fillStyle=p.c;
+      if(p.g){c.font=`700 ${p.s*2.2}px "IBM Plex Mono",monospace`;c.textAlign='center';c.textBaseline='middle';c.fillText(p.g,0,0);}
+      else if(p.sh){c.beginPath();c.arc(0,0,p.s*.45,0,6.28);c.fill();}
+      else c.fillRect(-p.s/2,-p.s/4,p.s,p.s/2);
+      c.restore();});
+    const alive=parts.some(p=>p.y<H+40);
+    if(alive&&now-t0<6000) requestAnimationFrame(step);else cv.remove();
+  };
+  requestAnimationFrame(step);
+}
+
+/* certificate code: packs db, time, duration, wrong tries and hints, scrambled by the name and checked with a hash */
+const EPOCH_MIN=Math.floor(Date.UTC(2025,0,1)/60000);
+const B32='0123456789ABCDEFGHJKMNPQRSTVWXYZ';
+const M64=(1n<<64n)-1n,M57=(1n<<57n)-1n;
+function fnv(str){let h=0xcbf29ce484222325n;for(const b of new TextEncoder().encode(str)){h^=BigInt(b);h=(h*0x100000001b3n)&M64;}return h;}
+const normName=s=>String(s||'').trim().toLowerCase().replace(/\s+/g,' ');
+function makeCode(name,dbi,at,secs,wrong,hints){
+  const mins=BigInt(clamp(Math.floor(at/60000)-EPOCH_MIN,0,0xFFFFFF));
+  const p=(BigInt(dbi&7)<<54n)|(mins<<30n)|(BigInt(clamp(secs,0,65535))<<14n)|(BigInt(clamp(wrong,0,255))<<6n)|BigInt(clamp(hints,0,63));
+  const nm=normName(name);const key=fnv(nm+'|sjs-key')&M57;const chk=fnv(nm+'|'+p.toString(36)+'|sjs-chk')&0xFFFFFn;
+  let v=((p^key)<<20n)|chk;let s='';for(let i=0;i<16;i++){s=B32[Number(v&31n)]+s;v>>=5n;}
+  return s.match(/.{4}/g).join('-');
+}
+function readCode(name,code){
+  const clean=String(code||'').toUpperCase().replace(/[^0-9A-Z]/g,'').replace(/O/g,'0').replace(/[IL]/g,'1');if(clean.length!==16) return null;
+  let v=0n;for(const ch of clean){const i=B32.indexOf(ch);if(i<0) return null;v=(v<<5n)|BigInt(i);}
+  const nm=normName(name);const key=fnv(nm+'|sjs-key')&M57;const chk=v&0xFFFFFn;const p=(v>>20n)^key;
+  if(p>>57n) return null;if((fnv(nm+'|'+p.toString(36)+'|sjs-chk')&0xFFFFFn)!==chk) return null;
+  return {dbi:Number((p>>54n)&7n),at:(Number((p>>30n)&0xFFFFFFn)+EPOCH_MIN)*60000,secs:Number((p>>14n)&0xFFFFn),wrong:Number((p>>6n)&0xFFn),hints:Number(p&63n)};
+}
+function wrapText(c,text,x,y,maxW,lh){const words=text.split(' ');let line='';for(const w of words){const t=line?line+' '+w:w;if(c.measureText(t).width>maxW&&line){c.fillText(line,x,y);line=w;y+=lh;}else line=t;}if(line) c.fillText(line,x,y);return y;}
+function spaced(c,t,x,y,sp,align){
+  align=align||'left';
+  if('letterSpacing' in c){const pa=c.textAlign;c.letterSpacing=sp+'px';c.textAlign=align;c.fillText(t,x+(align==='right'?sp:0),y);c.letterSpacing='0px';c.textAlign=pa;return;}
+  const chars=[...t];const w=chars.reduce((s,ch)=>s+c.measureText(ch).width+sp,0)-sp;let cx=align==='right'?x-w:x;const pa=c.textAlign;c.textAlign='left';
+  for(const ch of chars){c.fillText(ch,cx,y);cx+=c.measureText(ch).width+sp;}c.textAlign=pa;
+}
+async function buildCert(){
+  try{if(document.fonts){await Promise.all(['700 20px "IBM Plex Sans Condensed"','400 16px "IBM Plex Sans"','500 16px "IBM Plex Sans"','600 16px "IBM Plex Mono"'].map(f=>document.fonts.load(f)));}}catch(e){}
+  const db=S.db,p=S.prog,T=totals();const name=(store.name||'Participant').trim();
+  const code=makeCode(name,db.index,p.completedAt,T.secs,T.wrong,T.hints);
+  const W=1200,H=720,R=2;const cv=document.createElement('canvas');cv.width=W*R;cv.height=H*R;const c=cv.getContext('2d');c.scale(R,R);
+  const K={bg:'#eef2f6',card:'#ffffff',ink:'#15202b',ink2:'#4a5a6a',ink3:'#7a8794',line:'#d9dfe6',line2:'#c4ccd6',dot:'#cfd6de',panel:'#f4f6f9',accent:'#2c56d6',ok:'#1b8448',okSoft:'#dcf2e5',pk:'#a86f05',h:['#2c6fd6','#cc7419','#1f8c80','#8a4dcc','#c24564','#5b8619','#5c6a80']};
+  const sans='"IBM Plex Sans",system-ui,-apple-system,"Segoe UI",Roboto,Arial,sans-serif',cond='"IBM Plex Sans Condensed","IBM Plex Sans","Arial Narrow",sans-serif',mono='"IBM Plex Mono",ui-monospace,Menlo,Consolas,monospace';
+  const font=(w,s,f)=>{c.font=`${w} ${s}px ${f}`;};
+  c.fillStyle=K.bg;c.fillRect(0,0,W,H);c.fillStyle=K.dot;
+  for(let x=12;x<W;x+=24) for(let y=12;y<H;y+=24){c.beginPath();c.arc(x,y,1.2,0,6.283);c.fill();}
+  rrect(c,28,28,W-56,H-56,22);c.fillStyle=K.card;c.fill();c.lineWidth=1.5;c.strokeStyle=K.line;c.stroke();
+  rrect(c,64,62,44,44,10);c.fillStyle=K.ink;c.fill();c.fillStyle='#fff';font(600,26,mono);c.textAlign='center';c.textBaseline='middle';c.fillText('⋈',86,85);
+  c.textBaseline='alphabetic';c.textAlign='left';c.fillStyle=K.ink;font(700,23,cond);c.fillText('SQL Join Studio',122,82);
+  c.fillStyle=K.ink3;font(400,14,sans);c.fillText('Data modeling and SQL joins practice',122,102);
+  c.fillStyle=K.accent;font(600,13,mono);spaced(c,'CERTIFICATE OF COMPLETION',W-64,82,2.2,'right');
+  c.fillStyle=K.ink3;font(400,13.5,sans);c.textAlign='right';c.fillText(fmtDate(p.completedAt),W-64,102);c.textAlign='left';
+  c.fillStyle=K.ink3;font(500,15,sans);c.fillText('Awarded to',64,176);
+  let ns=54;font(700,ns,cond);while(c.measureText(name).width>520&&ns>26){ns-=2;font(700,ns,cond);}
+  c.fillStyle=K.ink;c.fillText(name,64,232);
+  c.fillStyle=K.ink2;font(400,18,sans);
+  wrapText(c,`for building the ${db.name} ${db.domain.toLowerCase()} data model and solving every SQL join in the Join Lab.`,64,272,520,27);
+  const stats=[['Relationships',`${T.nrel}/${T.nrel}`],['Joins solved',`${T.nj}/${T.nj}`],['Accuracy',T.acc+'%'],['Time',fmtDur(T.secs)],['Wrong tries',String(T.wrong)],['Hints used',String(T.hints)]];
+  stats.forEach(([l,v],i)=>{const x=64+(i%3)*174,y=344+Math.floor(i/3)*92;rrect(c,x,y,162,80,12);c.fillStyle=K.panel;c.fill();c.fillStyle=K.ink3;font(600,11,mono);spaced(c,l.toUpperCase(),x+14,y+27,1.2);c.fillStyle=K.ink;font(700,28,cond);c.fillText(v,x+14,y+64);});
+  c.fillStyle=K.ink3;font(600,11,mono);spaced(c,'VERIFICATION CODE',64,592,1.2);
+  c.fillStyle=K.ink;font(600,23,mono);c.fillText(code,64,624);
+  c.fillStyle=K.ink3;font(400,12.5,sans);c.fillText('Your instructor can check this code on the SQL Join Studio home page.',64,652);
+  rrect(c,620,140,516,512,16);c.fillStyle=K.panel;c.fill();c.strokeStyle=K.line;c.lineWidth=1;c.stroke();
+  c.fillStyle=K.ink3;font(600,11,mono);spaced(c,'FINAL MODEL',644,172,1.2);
+  c.fillStyle=K.ink2;font(400,13,sans);c.fillText(`${db.tableList.length} tables, ${T.nrel} relationships`,644,192);
+  // mini diagram
+  const area={x:648,y:214,w:460,h:330};const ids=db.tableList.map(t=>t.id);const b=bbox(ids);
+  const s=Math.min(area.w/(b.w+60),area.h/(b.h+20),.6);const ox=area.x+(area.w-b.w*s)/2-b.x*s,oy=area.y+(area.h-b.h*s)/2-b.y*s;const X=v=>ox+v*s,Y=v=>oy+v*s;
+  S.links.filter(l=>l.ok).forEach(L=>{
+    const G=geom(L.a,L.b);c.beginPath();c.moveTo(X(G.p0.x),Y(G.p0.y));c.bezierCurveTo(X(G.p1.x),Y(G.p1.y),X(G.p2.x),Y(G.p2.y),X(G.p3.x),Y(G.p3.y));c.strokeStyle=K.ok;c.lineWidth=1.8;c.stroke();
+    const [ea,eb]=ends(L.card);[[G.p0,G.sa,ea],[G.p3,G.sb,eb]].forEach(([pt,sd,t])=>{const cx=X(pt.x)+sd*10,cy=Y(pt.y);c.beginPath();c.arc(cx,cy,7,0,6.283);c.fillStyle='#fff';c.fill();c.strokeStyle=K.ok;c.lineWidth=1.3;c.stroke();c.fillStyle=K.ink;font(700,9.5,mono);c.textAlign='center';c.textBaseline='middle';c.fillText(t,cx,cy+.5);c.textAlign='left';c.textBaseline='alphabetic';});
+  });
+  db.tableList.forEach(t=>{
+    const r=tbox(t.id);const x=X(r.x),y=Y(r.y),w=r.w*s,h=r.h*s;
+    rrect(c,x,y,w,h,5);c.fillStyle='#fff';c.fill();c.strokeStyle=K.line2;c.lineWidth=1;c.stroke();
+    c.save();rrect(c,x,y,w,h,5);c.clip();c.fillStyle=K.h[t.hueIdx];c.fillRect(x,y,w,3);c.restore();
+    const el=S.els[t.id];const hh=el.querySelector('.thead').offsetHeight*s;
+    c.fillStyle=K.ink;font(600,clamp(13*s*1.7,8.5,12.5),cond);c.textBaseline='middle';
+    let nm=t.id;while(c.measureText(nm).width>w-10&&nm.length>3) nm=nm.slice(0,-2)+'…';
+    c.fillText(nm,x+6,y+hh/2+1.5);c.textBaseline='alphabetic';
+    c.strokeStyle=K.line;c.beginPath();c.moveTo(x,y+hh);c.lineTo(x+w,y+hh);c.stroke();
+    t.colList.forEach(col=>{const ry=Y(colY({t:t.id,c:col.name}));c.fillStyle=col.pk?K.pk:col.fk?'#0d7685':'#dfe4ea';c.globalAlpha=col.pk||col.fk?.75:1;rrect(c,x+6,ry-1.6,Math.max(6,w*(col.pk||col.fk?.42:.55)),3.2,1.6);c.fill();c.globalAlpha=1;});
+  });
+  const jy=578,jw=(460-3*8)/4;
+  JTYPES.forEach((t,i)=>{const x=648+i*(jw+8);rrect(c,x,jy,jw,34,17);c.fillStyle=K.okSoft;c.fill();c.strokeStyle=K.ok;c.lineWidth=1.6;c.beginPath();c.moveTo(x+14,jy+17.5);c.lineTo(x+18.5,jy+22);c.lineTo(x+26,jy+12.5);c.stroke();c.fillStyle=K.ok;font(600,11.5,mono);c.fillText(JNAME[t],x+31,jy+21.5);});
+  c.beginPath();c.arc(1082,150,40,0,6.283);c.fillStyle=K.ok;c.fill();c.strokeStyle='#fff';c.lineWidth=4;c.stroke();
+  c.fillStyle='#fff';c.textAlign='center';font(700,22,cond);c.fillText('100%',1082,153);font(600,8.5,mono);spaced(c,'COMPLETE',1082,169,1,'center');c.textAlign='left';
+  return {cv,code};
+}
+async function showCertificate(){
+  if(!S||!S.prog.complete) return;
+  $$('.toast').forEach(t=>t.remove());
+  const {cv}=await buildCert();const url=cv.toDataURL('image/png');
+  let blob=null;const blobP=new Promise(res=>cv.toBlob(b=>{blob=b;res(b);},'image/png'));
+  const db=S.db;const first=(store.name||'').trim().split(/\s+/)[0]||'there';
+  const m=openModal(`<div class="seal">${ic('check')}</div><h2>Congratulations, ${esc(first)}!</h2><p class="sub">You built the ${esc(db.name)} data model and solved every join. 100% complete.</p>
+    <img class="cert-img" src="${url}" alt="Certificate of completion for ${esc(store.name)}, ${esc(db.name)} database, 100 percent">
+    <p class="how">Click <b>Copy image</b>, then paste with <kbd>Ctrl</kbd> + <kbd>V</kbd> (<kbd>⌘</kbd> + <kbd>V</kbd> on a Mac) into your email or chat to send it to your instructor.</p>
+    <p class="how" id="copy-note" hidden></p>
+    <div class="modal-f"><button class="btn" data-x="other">Try another database</button><button class="btn" data-x="close">Review my model</button><button class="btn primary" data-x="copy">${ic('copy')}Copy image</button></div>`,{cls:'win'});
+  const el=m.el;
+  $('[data-x="other"]',el).addEventListener('click',()=>{m.close();goHome();});
+  $('[data-x="copy"]',el).addEventListener('click',async e=>{
+    const btn=e.currentTarget;
+    try{
+      if(!navigator.clipboard||!window.ClipboardItem) throw new Error('unsupported');
+      await navigator.clipboard.write([new ClipboardItem({'image/png':blob||blobP})]);
+      btn.innerHTML=`${ic('check')}Copied`;toast('Certificate copied. Paste it into your email or chat.','ok');
+    }catch(err){
+      const n=$('#copy-note',el);n.hidden=false;n.innerHTML='This browser blocked copying the image. Right-click the certificate and choose <b>Copy image</b>, or take a screenshot (<kbd>Win</kbd> + <kbd>Shift</kbd> + <kbd>S</kbd>, or <kbd>⌘</kbd> + <kbd>Shift</kbd> + <kbd>4</kbd> on a Mac).';
+    }
+  });
+}
+
+/* ---------- other modals ---------- */
+function openPreview(tid){
+  const t=Tb(S.db,tid);
+  openModal(`<h2 class="mono" style="font-family:var(--f-mono);font-size:20px">${t.id}</h2><p class="sub">${esc(t.desc)} ${t.rows.length} sample rows. Real tables hold millions.</p>
+    <div class="dtable-wrap"><table class="dt"><thead><tr>${t.colList.map(c=>`<th>${c.name}<small>${c.type}${c.pk?' · PK':''}${c.fk?' · FK':''}${c.uq?' · UQ':''}${c.nullable?' · null':''}</small></th>`).join('')}</tr></thead><tbody>${t.rows.map(r=>`<tr>${t.colList.map(c=>`<td>${fmtCell(c,r[c.idx])}</td>`).join('')}</tr>`).join('')}</tbody></table></div>
+    <div class="modal-f"><button class="btn primary" data-x="close">Close</button></div>`,{wide:true});
+}
+function openReset(){
+  const db=S.db;
+  const m=openModal(`<h2>Start ${esc(db.name)} over?</h2><p class="sub">This clears your relationships, join answers, hints and timer for this database. Other databases are not affected.</p><div class="modal-f"><button class="btn" data-x="close">Cancel</button><button class="btn danger" data-x="go">${ic('reset')}Start over</button></div>`);
+  $('[data-x="go"]',m.el).addEventListener('click',()=>{m.close();store.progress[db.id]=newProg();save();openStudio(db);toast(`${db.name} reset.`);});
+}
+function openVerify(){
+  const m=openModal(`<h2>Verify a certificate</h2><p class="sub">Type the participant's name exactly as it appears on the certificate, plus the 16-character code.</p>
+    <form class="vform" id="vform" novalidate><label for="v-name">Name on certificate<input id="v-name" class="field" type="text" autocomplete="off" required></label>
+    <label for="v-code">Verification code<input id="v-code" class="field mono" type="text" autocomplete="off" placeholder="XXXX-XXXX-XXXX-XXXX" required></label></form>
+    <div id="v-res"></div><div class="modal-f"><button class="btn" data-x="close">Close</button><button class="btn primary" type="submit" form="vform">Check code</button></div>`);
+  $('#vform',m.el).addEventListener('submit',e=>{
+    e.preventDefault();const n=$('#v-name',m.el).value,c=$('#v-code',m.el).value;const r=readCode(n,c);const out=$('#v-res',m.el);
+    if(!r||!DBS[r.dbi]){out.innerHTML=`<div class="vres bad">${ic('alert')} This code doesn't match that name. Check the spelling of both.</div>`;return;}
+    const d=DBS[r.dbi],nrel=d.relList.length,nj=d.joins.length;
+    out.innerHTML=`<div class="vres ok"><b style="color:var(--ok)">${ic('check')} Valid certificate</b><dl><dt>Database</dt><dd>${esc(d.name)}, ${esc(d.domain)}</dd><dt>Completed</dt><dd>${fmtDate(r.at)}</dd><dt>Time</dt><dd>${fmtDur(r.secs)}</dd><dt>Wrong tries</dt><dd>${r.wrong}</dd><dt>Hints used</dt><dd>${r.hints}</dd><dt>Accuracy</dt><dd>${Math.round((nrel+nj)/(nrel+nj+r.wrong)*100)}%</dd></dl><p style="margin-top:8px;font-size:12.5px;color:var(--ink-2)">These details should match the certificate image.</p></div>`;
+  });
+}
+
+/* ---------- actions ---------- */
+function act(a,el,e){
+  switch(a){
+    case 'theme': toggleTheme();break;
+    case 'guide': openGuide();break;
+    case 'verify': openVerify();break;
+    case 'open': if(nameOk()) openStudio(DB_BY_ID[el.dataset.db]);break;
+    case 'home': goHome();break;
+    case 'phase-model': if(S.labOpen) closeLab();break;
+    case 'phase-lab': if(S.labOpen) return;openLab();break;
+    case 'lab-close': closeLab();break;
+    case 'hint': if(S.labOpen&&S.prog.labIntro&&!S.prog.labDone) labHint();else modelHint();break;
+    case 'reset': openReset();break;
+    case 'cert': showCertificate();break;
+    case 'zin': zoomBy(1.25);break;
+    case 'zout': zoomBy(1/1.25);break;
+    case 'z100': {const vp=vpEl();cancelAnimationFrame(viewAnim);zoomAt(1/S.V.k,vp.clientWidth/2,vp.clientHeight/2);break;}
+    case 'fit': fitView(S.labOpen&&S.prog.labIntro&&!S.prog.labDone?[S.db.joins[S.prog.lab].left[0],S.db.joins[S.prog.lab].right[0]]:null,true);break;
+    case 'tidy': defaultLayout();S.prog.autoLayout=true;placeAll();renderLinks();fitView(null,true);persist();toast('Original layout restored.');break;
+    case 'preview': openPreview(el.dataset.t);break;
+    case 'show-bad': {const L=S.links.find(l=>!l.ok);if(L){if(S.labOpen&&innerWidth<900) closeLab();focusLink(L);}break;}
+    case 'lab-start': S.prog.labIntro=true;S.prog.lab=0;persist();renderLab();labFocus();break;
+    case 'lab-go': S.prog.labIntro=true;S.prog.labDone=false;S.prog.lab=+el.dataset.i;persist();renderLab();$('#lab-b').scrollTop=0;labFocus();break;
+    case 'lab-review': S.prog.labDone=false;S.prog.lab=0;renderLab();labFocus();break;
+    case 'pick': labPick(el.dataset.type);break;
+    case 'lab-check': labCheck();break;
+    case 'lab-hint': labHint();break;
+    case 'lab-next': labNext();break;
+  }
+}
+document.addEventListener('click',e=>{const a=e.target.closest('[data-act]');if(!a||a.disabled) return;act(a.dataset.act,a,e);});
+document.addEventListener('keydown',e=>{
+  const typing=e.target&&(e.target.tagName==='INPUT'||e.target.tagName==='TEXTAREA');
+  if(e.key==='Escape'){if(closeTopModal()) return;if($('.pop')){closePops();return;}if(S&&S.armed){clearArmed();return;}if(S&&PI&&PI.mode==='link'){abortPI();return;}return;}
+  if(!S||typing||modalStack.length||$('.drawer-scrim')) return;
+  if(e.target.classList&&e.target.classList.contains('col')&&(e.key==='Enter'||e.key===' ')){e.preventDefault();colActivate(e.target);return;}
+  if($('.pop')) return;
+  if(e.key==='+'||e.key==='='){zoomBy(1.2);}else if(e.key==='-'||e.key==='_'){zoomBy(1/1.2);}else if(e.key==='0'){fitView(null,true);}
+});
+
+/* ---------- init ---------- */
+function init(){
+  $$('.ico-hint').forEach(e=>e.outerHTML=ic('hint'));$$('.ico-guide').forEach(e=>e.outerHTML=ic('guide'));$$('.ico-cert').forEach(e=>e.outerHTML=ic('cert'));
+  $$('.ico-reset').forEach(e=>e.outerHTML=ic('reset'));$$('.ico-x').forEach(e=>e.outerHTML=ic('x'));$$('.ico-clock').forEach(e=>e.outerHTML=ic('clock'));
+  $('#btn-back').innerHTML=ic('back');
+  const zb=$('.zoombar');$('[data-act="zin"]',zb).innerHTML=ic('plus');$('[data-act="zout"]',zb).innerHTML=ic('minus');$('[data-act="fit"]',zb).innerHTML=ic('fit');$('[data-act="tidy"]',zb).innerHTML=ic('tidy');
+  paintThemeButtons();refreshColors();renderHome();
+  const nm=$('#pname');
+  nm.addEventListener('input',()=>{nm.classList.remove('err');const h=$('#pname-help');h.classList.remove('err');h.textContent='It goes on your completion certificate. Progress saves in this browser.';store.name=nm.value.trim();save();});
+  nm.addEventListener('keydown',e=>{if(e.key==='Enter'){e.preventDefault();if(nameOk()) $('#dbgrid .db').focus();}});
+  const vp=vpEl();
+  vp.addEventListener('pointerdown',onDown);vp.addEventListener('pointermove',onMove);vp.addEventListener('pointerup',onUp);vp.addEventListener('pointercancel',onCancel);
+  vp.addEventListener('pointerleave',e=>{if(!PI) hideTip();});
+  vp.addEventListener('wheel',e=>{
+    if(!S||e.target.closest('.coach')) return;e.preventDefault();hideTip();cancelAnimationFrame(viewAnim);
+    const r=vp.getBoundingClientRect();
+    const mouse=e.ctrlKey||e.deltaMode===1||(Math.abs(e.deltaY)>=40&&e.deltaX===0&&Number.isInteger(e.deltaY));
+    if(mouse){const f=Math.exp(-e.deltaY*(e.ctrlKey?.01:e.deltaMode===1?.05:.0016));zoomAt(f,e.clientX-r.left,e.clientY-r.top);}
+    else{S.V.x-=e.deltaX;S.V.y-=e.deltaY;applyView();}
+  },{passive:false});
+  const mm=$('#minimap');let mmDrag=null;
+  mm.addEventListener('pointerdown',e=>{if(!S||!S.mm) return;e.stopPropagation();mmDrag={...S.mm};try{mm.setPointerCapture(e.pointerId);}catch(err){}cancelAnimationFrame(viewAnim);mmMove(e,mmDrag);});
+  mm.addEventListener('pointermove',e=>{if(mmDrag) mmMove(e,mmDrag);});
+  mm.addEventListener('pointerup',()=>{mmDrag=null;});mm.addEventListener('pointercancel',()=>{mmDrag=null;});
+  window.addEventListener('resize',()=>{if(S){applyView();if(innerWidth<560) closePops();}});
+  window.addEventListener('hashchange',()=>{const h=location.hash.slice(1);if(!h&&S) goHome();else if(h&&DB_BY_ID[h]&&(!S||S.db.id!==h)&&store.name) openStudio(DB_BY_ID[h]);});
+  window.addEventListener('pagehide',persist);
+  document.addEventListener('visibilitychange',()=>{if(document.hidden) persist();});
+  if(RM()){const svg=$('#demo-svg');if(svg){$$('animate,animateMotion',svg).forEach(a=>a.remove());const g=$('.d-okg',svg);g&&g.setAttribute('opacity','1');const c=$('.d-cur',svg);c&&c.setAttribute('opacity','0');const d=$('.d-draw',svg);d&&d.setAttribute('opacity','0');}}
+  const h=location.hash.slice(1);
+  if(h&&DB_BY_ID[h]&&store.name) openStudio(DB_BY_ID[h]);
+}
+init();
+})();
+
+</script>
+</body>
+</html>
